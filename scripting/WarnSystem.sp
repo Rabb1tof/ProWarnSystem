@@ -1,9 +1,15 @@
 //---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
 
+<<<<<<< HEAD
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
 #define PLUGIN_VERSION      "1.4-dev"
+=======
+#define PLUGIN_NAME         "WarnSystem"
+#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
+#define PLUGIN_VERSION      "1.3"
+>>>>>>> dev
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 

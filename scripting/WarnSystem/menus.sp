@@ -387,8 +387,11 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
     
     if(!IsValidClient(iAdmin))      return;
     
+<<<<<<< HEAD
     //`ws_warn`.`warn_id`, `player`.`account_id` client_id, `admin`.`username` admin_name, `ws_warn`.`created_at`
     
+=======
+>>>>>>> dev
     //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
     //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
     
@@ -402,8 +405,13 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
     {
         iID = hDatabaseResults.FetchInt(0);
         IntToString(iID, szID, sizeof(szID));
+<<<<<<< HEAD
         SQL_FetchString(hDatabaseResults, 2, szAdmin, sizeof(szAdmin));
         iDate = hDatabaseResults.FetchInt(3);
+=======
+        SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
+        iDate = hDatabaseResults.FetchInt(2);
+>>>>>>> dev
         
         
         FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
@@ -445,12 +453,16 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     char szClient[129], szAdmin[129], szReason[129], szTimeFormat[65], szBuffer[80];
     int iDate, iExpired;
     
+<<<<<<< HEAD
     //                    0                            1                                 2                              3                      4                  5                       6
     //`admin`.`account_id` admin_id, `admin`.`username` admin_name, `player`.`account_id` client_id, `player`.`username` client_name, `ws_warn`.`reason` `ws_warn`.`expires_at`, `ws_warn`.`created_at`
+=======
+>>>>>>> dev
     
     Menu hMenu = new Menu(GetInfoWarnMenu_CallBack);
     hMenu.SetTitle("%T:\n", "WS_InfoWarn", iAdmin);
     
+<<<<<<< HEAD
     SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoAdmin", iAdmin, szAdmin);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
@@ -464,6 +476,20 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     iDate    = hDatabaseResults.FetchInt(6);
     FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iExpired);
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, szTimeFormat);
+=======
+    SQL_FetchString(hDatabaseResults, 0, szClient, sizeof(szClient));
+    FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoClient", iAdmin, szClient);
+    hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
+    SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
+    FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoAdmin", iAdmin, szAdmin);
+    hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
+    SQL_FetchString(hDatabaseResults, 2, szReason, sizeof(szReason));
+    FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoReason", iAdmin ,szReason);
+    hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
+    iDate = hDatabaseResults.FetchInt(3);
+    iExpired = hDatabaseResults.FetchInt(4);
+    FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, iExpired == 0 ? "-" : "+");
+>>>>>>> dev
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoTime", iAdmin, szTimeFormat);
