@@ -388,10 +388,13 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
     if(!IsValidClient(iAdmin))      return;
     
 <<<<<<< HEAD
+<<<<<<< HEAD
     //`ws_warn`.`warn_id`, `player`.`account_id` client_id, `admin`.`username` admin_name, `ws_warn`.`created_at`
     
 =======
 >>>>>>> dev
+=======
+>>>>>>> pre-release
     //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
     //CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
     
@@ -406,12 +409,17 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
         iID = hDatabaseResults.FetchInt(0);
         IntToString(iID, szID, sizeof(szID));
 <<<<<<< HEAD
+<<<<<<< HEAD
         SQL_FetchString(hDatabaseResults, 2, szAdmin, sizeof(szAdmin));
         iDate = hDatabaseResults.FetchInt(3);
 =======
         SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
         iDate = hDatabaseResults.FetchInt(2);
 >>>>>>> dev
+=======
+        SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
+        iDate = hDatabaseResults.FetchInt(2);
+>>>>>>> pre-release
         
         
         FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
@@ -437,9 +445,14 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
             //LogMessage("Fetch warn: %s", szdbQuery);
             g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
         } 
+<<<<<<< HEAD
         case MenuAction_End:    CloseHandle(hMenu);
         case MenuAction_Cancel: if(iItem == MenuCancel_ExitBack)    DisplaySomeoneTargetMenu(param1, MenuHandler_CheckWarn);
             
+=======
+        case MenuAction_End:
+            CloseHandle(hMenu);
+>>>>>>> pre-release
             
     }
 }
@@ -454,14 +467,18 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     int iDate, iExpired;
     
 <<<<<<< HEAD
+<<<<<<< HEAD
     //                    0                            1                                 2                              3                      4                  5                       6
     //`admin`.`account_id` admin_id, `admin`.`username` admin_name, `player`.`account_id` client_id, `player`.`username` client_name, `ws_warn`.`reason` `ws_warn`.`expires_at`, `ws_warn`.`created_at`
 =======
 >>>>>>> dev
+=======
+>>>>>>> pre-release
     
     Menu hMenu = new Menu(GetInfoWarnMenu_CallBack);
     hMenu.SetTitle("%T:\n", "WS_InfoWarn", iAdmin);
     
+<<<<<<< HEAD
 <<<<<<< HEAD
     SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoAdmin", iAdmin, szAdmin);
@@ -477,6 +494,8 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iExpired);
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, szTimeFormat);
 =======
+=======
+>>>>>>> pre-release
     SQL_FetchString(hDatabaseResults, 0, szClient, sizeof(szClient));
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoClient", iAdmin, szClient);
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
@@ -489,7 +508,10 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
     iDate = hDatabaseResults.FetchInt(3);
     iExpired = hDatabaseResults.FetchInt(4);
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, iExpired == 0 ? "-" : "+");
+<<<<<<< HEAD
 >>>>>>> dev
+=======
+>>>>>>> pre-release
     hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
     FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
     FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoTime", iAdmin, szTimeFormat);

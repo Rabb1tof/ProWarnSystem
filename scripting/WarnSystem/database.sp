@@ -1,6 +1,7 @@
 int g_iServerID = 0;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player` (`account_id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `username` VARCHAR(64) NOT NULL default '', `warns` INTEGER(10) NOT NULL DEFAULT '0');",
 	g_sSQL_CreateTablePlayers_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_player` (`account_id` int(12) NOT NULL default '' AUTO_INCREMENT COMMENT 'Steam AccountID', `username` VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL default '', `warns` INTEGER(10) unsigned NOT NULL DEFAULT '0', PRIMARY KEY (account_id)) CHARSET=utf8 COLLATE utf8_general_ci COMMENT = 'Перечень всех игроков';",
     g_sSQL_CreateTableWarns_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_warn` ( \
@@ -55,6 +56,22 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sClientIP[MAXPLAYERS+1][65],
 	g_sAddress[64];
 >>>>>>> dev
+=======
+char g_sSQL_CreateTable_SQLite[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, `serverid` INTEGER(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` INTEGER(32) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` INTEGER(32) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` INTEGER(32) NOT NULL default 0, `expired` INTEGER(1) NOT NULL default 0);",
+	g_sSQL_CreateTable_MySQL[] = "CREATE TABLE IF NOT EXISTS `WarnSystem` (`id` int(12) NOT NULL AUTO_INCREMENT, `serverid` int(12) NOT NULL default 0, `client` VARCHAR(128) NOT NULL default '', `clientid` int(64) NOT NULL default '0', `admin` VARCHAR(128) NOT NULL default '', `adminid` int(64) NOT NULL default '0', `reason` VARCHAR(64) NOT NULL default '', `time` int(12) NOT NULL default 0, `expired` int(1) NOT NULL default 0, PRIMARY KEY (id)) CHARSET=utf8 COLLATE utf8_general_ci;",
+	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS `WarnSystem_Servers` (`sid` int(12) NOT NULL AUTO_INCREMENT, `address` VARCHAR(64) NOT NULL default '', PRIMARY KEY (sid)) CHARSET=utf8 COLLATE utf8_general_ci;",
+	g_sSQL_GetServerID[] = "SELECT `sid` FROM `WarnSystem_Servers` WHERE `address` = '%s';",
+	g_sSQL_SetServerID[] = "INSERT INTO `WarnSystem_Servers` (`address`) VALUES ('%s');",
+	g_sSQL_WarnPlayer[] = "INSERT INTO `WarnSystem` (`serverid`, `client`, `clientid`, `admin`, `adminid`, `reason`, `time`) VALUES ('%i', '%s', '%i', '%s', '%i', '%s', '%i');",
+	g_sSQL_DeleteWarns[] = "DELETE FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
+	g_sSQL_SetExpired[] = "UPDATE `WarnSystem` SET `expired` = '1' WHERE `clientid` = '%i' AND `serverid` = '%i';",
+	g_sSQL_SelectWarns[] = "SELECT `id` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i' AND `expired` = '0'",
+	g_sSQL_UnwarnPlayer[] = "DELETE FROM `WarnSystem` WHERE `id` = '%i' AND `serverid` = '%i';",
+	g_sSQL_CheckPlayerWarns[] = "SELECT `id`,`admin`, `time` FROM `WarnSystem` WHERE `clientid` = '%i' AND `serverid` = '%i';",
+	g_sSQL_GetInfoWarn[] = "SELECT `client`, `admin`, `reason`, `time`, `expired` FROM `WarnSystem` WHERE `id` = '%i'",
+	g_sClientIP[MAXPLAYERS+1][65],
+	g_sAddress[24];
+>>>>>>> pre-release
 	
 int g_iAccountID[MAXPLAYERS+1];
 
@@ -76,6 +93,7 @@ public void InitializeDatabase()
 	Handle hDatabaseDriver = view_as<Handle>(g_hDatabase.Driver);
 	if (hDatabaseDriver == SQL_GetDriver("sqlite"))
 	{
+<<<<<<< HEAD
 <<<<<<< HEAD
         g_hDatabase.SetCharset("utf8");
         //SQL_LockDatabase(g_hDatabase);
@@ -120,6 +138,25 @@ public void InitializeDatabase()
 >>>>>>> dev
         } else
             SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
+=======
+        //g_hDatabase.SetCharset("utf8");
+        SQL_LockDatabase(g_hDatabase);
+        g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_SQLite);
+        SQL_UnlockDatabase(g_hDatabase);
+	} else
+		if (hDatabaseDriver == SQL_GetDriver("mysql"))
+		{
+			g_iServerID = -1;
+			//STATS_Generic_GetIP(g_sAddress, sizeof(g_sAddress));
+			
+			g_hDatabase.SetCharset("utf8");
+			SQL_LockDatabase(g_hDatabase);
+			g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTable_MySQL);
+			g_hDatabase.Query(SQL_CreateTableServers, g_sSQL_CreateTableServers);
+			SQL_UnlockDatabase(g_hDatabase);
+		} else
+			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
+>>>>>>> pre-release
 	
 	if (g_bIsLateLoad)
 	{
@@ -129,6 +166,7 @@ public void InitializeDatabase()
 	}
 }
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 public void SQL_TransactionSuccefully(Database hDatabase, any data, int iNumQueries, Handle[] hResults, any[] queryData)
 {
@@ -144,6 +182,8 @@ public void SQL_TransactionFailed(Database hDatabase, any data, int iNumQueries,
 
 =======
 >>>>>>> dev
+=======
+>>>>>>> pre-release
 public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, any data)
 {
 	if (hDatabaseResults == INVALID_HANDLE || sError[0])
@@ -154,7 +194,11 @@ public void SQL_CreateTableServers(Database hDatabase, DBResultSet hDatabaseResu
 public void GetServerID()
 {
 	char dbQuery[257];
+<<<<<<< HEAD
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, g_sAddress, g_iPort);
+=======
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_GetServerID, g_sAddress);
+>>>>>>> pre-release
 	g_hDatabase.Query(SQL_SelectServerID, dbQuery);
 }
 
@@ -173,7 +217,11 @@ public void SQL_SelectServerID(Database hDatabase, DBResultSet hDatabaseResults,
 	}
 	
 	char dbQuery[257];
+<<<<<<< HEAD
 	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, g_sAddress, g_iPort);
+=======
+	FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetServerID, g_sAddress);
+>>>>>>> pre-release
 	g_hDatabase.Query(SQL_SetServerID, dbQuery);
 }
 
@@ -193,7 +241,11 @@ public void SQL_SetServerID(Database hDatabase, DBResultSet hDatabaseResults, co
 
 public void LoadPlayerData(int iClient)
 {
+<<<<<<< HEAD
 	if(IsValidClient(iClient) && g_hDatabase)
+=======
+	if(iClient && IsClientInGame(iClient) && !IsFakeClient(iClient) && g_hDatabase)
+>>>>>>> pre-release
 	{
 		char dbQuery[257];
 		g_iAccountID[iClient] = GetSteamAccountID(iClient);
@@ -228,7 +280,11 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 
 public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
+<<<<<<< HEAD
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+=======
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+>>>>>>> pre-release
 	{
 		if (iAdmin == iClient)
 		{
@@ -275,6 +331,7 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 		if (g_iWarnings[iClient] >= g_iMaxWarns)
 		{
 <<<<<<< HEAD
+<<<<<<< HEAD
             if(g_bResetWarnings){
                 FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
                 g_hDatabase.Query(SQL_CheckError, dbQuery);
@@ -287,6 +344,14 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
             g_hDatabase.Query(SQL_CheckError, dbQuery);
 >>>>>>> dev
             PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
+=======
+			if(g_bResetWarnings)
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
+				else
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SetExpired, g_iAccountID[iClient], g_iServerID);
+			g_hDatabase.Query(SQL_CheckError, dbQuery);
+			PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
+>>>>>>> pre-release
 		} else
 			PunishPlayer(iAdmin, iClient, sReason);
 	}
@@ -296,7 +361,11 @@ public void WarnPlayer(int iAdmin, int iClient, char sReason[129])
 
 public void UnWarnPlayer(int iAdmin, int iClient, char sReason[129])
 {
+<<<<<<< HEAD
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+=======
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, sReason) == Plugin_Continue)
+>>>>>>> pre-release
 	{
 		if (iAdmin == iClient)
 		{
@@ -345,7 +414,11 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 		iID = hDatabaseResults.FetchInt(0);
 		
 		--g_iWarnings[iClient];
+<<<<<<< HEAD
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID);
+=======
+		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayer, iID, g_iServerID);
+>>>>>>> pre-release
 		g_hDatabase.Query(SQL_CheckError, dbQuery);
 		
 		if (g_bPrintToChat)
@@ -368,7 +441,11 @@ public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, c
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 {
+<<<<<<< HEAD
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
+=======
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
+>>>>>>> pre-release
 	{
 		if (iAdmin == iClient)
 		{
@@ -393,6 +470,7 @@ public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 	
 }
 
+<<<<<<< HEAD
 //------------------------------------Check for expired warnings------------------------------------------------
 
 void CheckExpiredWarns()
@@ -411,6 +489,8 @@ public void SQL_CheckExpiredWarns(Database hDatabase, DBResultSet hDatabaseResul
 	}
 }
 
+=======
+>>>>>>> pre-release
 public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hResetWarnData)
 {	
 	if (hDatabaseResults == INVALID_HANDLE || sError[0])
@@ -456,7 +536,11 @@ public void SQL_ResetWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults
 
 public void CheckPlayerWarns(int iAdmin, int iClient)
 {
+<<<<<<< HEAD
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
+=======
+	if (0<iClient && iClient<=MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient) && -1<iAdmin && iAdmin<=MaxClients)
+>>>>>>> pre-release
 	{
 		char dbQuery[257];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_CheckPlayerWarns, g_iAccountID[iClient], g_iServerID);
