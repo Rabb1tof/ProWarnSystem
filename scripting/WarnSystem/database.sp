@@ -37,8 +37,8 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sSQL_UnwarnPlayer[] = "DELETE FROM `ws_warn` WHERE `warn_id` = '%i';",
 	g_sSQL_CheckPlayerWarns[] = "SELECT `ws_warn`.`warn_id`, `player`.`account_id` client_id, `admin`.`username` admin_name, `ws_warn`.`created_at` FROM `ws_warn` INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id` INNER JOIN `ws_player` AS admin ON `ws_warn`.`username` = `admin`.`username` WHERE `ws_warn`.`client_id` = '%i';",
 	g_sSQL_GetInfoWarn[] = "SELECT `admin`.`account_id` admin_id, `admin`.`username` admin_name, `player`.`account_id` client_id, `player`.`username` client_name, `ws_warn`.`reason` `ws_warn`.`expires_at`, `ws_warn`.`created_at` FROM `ws_warn` INNER JOIN `ws_player` AS admin  ON `ws_warn`.`admin_id` = `admin`.`account_id` INNER JOIN `ws_player` AS player ON `ws_warn`.`client_id` = `player`.`account_id` WHERE `ws_warn`.`warn_id` = '%i';",
-	g_sClientIP[MAXPLAYERS+1][65],
-	g_sAddress[64];
+	g_sClientIP[MAXPLAYERS+1][65];
+	//g_sAddress[64];
 	
 int g_iAccountID[MAXPLAYERS+1];
 
