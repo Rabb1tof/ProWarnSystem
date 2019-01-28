@@ -1,21 +1,9 @@
 //---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 #define PLUGIN_NAME         "[WarnSystem] Core"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
 #define PLUGIN_VERSION      "1.4-dev"
-=======
-#define PLUGIN_NAME         "WarnSystem"
-#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.3"
->>>>>>> dev
-=======
-#define PLUGIN_NAME         "WarnSystem"
-#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.3"
->>>>>>> pre-release
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -26,48 +14,35 @@
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
-<<<<<<< HEAD
 #include <dbi>
-=======
->>>>>>> pre-release
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
+#tryinclude <SteamWorks>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
-/*#tryinclude "WarnSystem/stats.sp"
-#ifdef __stats_included
-	#undef REQUIRE_PLUGIN
-	#undef REQUIRE_EXTENSIONS
-	#tryinclude <SteamWorks>
-	#tryinclude <socket>
-	#tryinclude <cURL>
-	#define REQUIRE_PLUGINS
-	#define REQUIRE_EXTENSIONS
-	
-	#define APIKEY 				"ddbfc98bf3d2f66a639ca538f75a2de6"
-	#define PLUGIN_STATS_REQURL "http://stats.scriptplugs.info/add_server.php"
-	#define PLUGIN_STATS_DOMAIN "stats.scriptplugs.info"
-	#define PLUGIN_STATS_SCRIPT "add_server.php"
-#endif */
-
-#pragma newdecls required
-#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 //----------------------------------------------------------------------------
 
 char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
-	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH];
+	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
 bool g_bIsFuckingGame;
 
 Database g_hDatabase;
 
-<<<<<<< HEAD
 int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1], g_iPort;
-=======
-int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1];
->>>>>>> pre-release
+
+#define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
+#define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
+
+#if defined _SteamWorks_Included
+#include "WarnSystem/stats.sp"
+#endif 
+
+#pragma newdecls required
+
+
 
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
@@ -88,43 +63,6 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-<<<<<<< HEAD
-    LoadTranslations("common.phrases");
-    LoadTranslations("core.phrases");
-    LoadTranslations("WarnSystem.phrases");
-    
-    switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
-    
-    BuildPath(Path_SM, g_sPathWarnReasons, sizeof(g_sPathWarnReasons), "configs/WarnSystem/WarnReasons.cfg");
-    BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnWarnReasons.cfg");
-    BuildPath(Path_SM, g_sPathResetReasons, sizeof(g_sPathResetReasons), "configs/WarnSystem/ResetWarnReasons.cfg");
-    BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
-    BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem.log");
-    
-    InitializeConVars();
-    InitializeDatabase();
-    InitializeCommands();
-    
-    /*#ifdef __stats_included
-        InitializeStats();
-    #endif */
-    
-    if (LibraryExists("adminmenu"))
-    {
-        Handle hAdminMenu;
-        if ((hAdminMenu = GetAdminTopMenu()))
-            InitializeMenu(hAdminMenu);
-    }
-    
-    GetIPServer();
-    GetPort();
-        
-    strcopy(g_sClientIP[0], 65, "localhost");
-    g_iAccountID[0] = -1;
-    
-    if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
-        g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
-=======
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
 	LoadTranslations("WarnSystem.phrases");
@@ -135,15 +73,21 @@ public void OnPluginStart()
 	BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnWarnReasons.cfg");
 	BuildPath(Path_SM, g_sPathResetReasons, sizeof(g_sPathResetReasons), "configs/WarnSystem/ResetWarnReasons.cfg");
 	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
-	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem.log");
+	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
+	if(!DirExists(g_sLogPath))
+		CreateDirectory(g_sLogPath, 511);
+	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
+	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
 	
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
 	
-	/*#ifdef __stats_included
-		InitializeStats();
-	#endif */
+	#if defined _SteamWorks_Included
+	// Stats work
+	if (LibraryExists("SteamWorks"))
+		SteamWorks_SteamServersConnected();
+	#endif
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -151,13 +95,15 @@ public void OnPluginStart()
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
 	}
+	
+	GetIPServer();
+	GetPort();
 		
 	strcopy(g_sClientIP[0], 65, "localhost");
 	g_iAccountID[0] = -1;
 	
 	if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
 		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
->>>>>>> pre-release
 }
 
 public void OnLibraryAdded(const char[] sName)
@@ -166,39 +112,25 @@ public void OnLibraryAdded(const char[] sName)
 	if (StrEqual(sName, "adminmenu"))
 		if ((hAdminMenu = GetAdminTopMenu()))
 			InitializeMenu(hAdminMenu);
-	/*#ifdef __stats_included
-		STATS_OnLibraryAdded(sName);
-	#endif*/
 }
 
 public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
-	/*#ifdef __stats_included
-		STATS_OnLibraryRemoved(sName);
-	#endif*/
 }
 
 public void OnMapStart()
 {
-<<<<<<< HEAD
-    /*#ifdef __stats_included
-		STATS_AddServer(APIKEY, PLUGIN_VERSION);
-    #endif*/
-    for(int iClient = 1; iClient <= MaxClients; ++iClient)
-		LoadPlayerData(iClient);
-    if(g_bWarnSound)
-    {
-=======
-	/*#ifdef __stats_included
-		STATS_AddServer(APIKEY, PLUGIN_VERSION);
-	#endif*/
-	for(int iClient = 1; iClient <= MaxClients; ++iClient)
-		LoadPlayerData(iClient);
+	#if defined _SteamWorks_Included
+	// Stats work
+	if (LibraryExists("SteamWorks"))
+		SteamWorks_SteamServersConnected();
+	#endif
+	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
+		LoadPlayerData(iClient);*/
 	if(g_bWarnSound)
 	{
->>>>>>> pre-release
 		char sBuffer[PLATFORM_MAX_PATH];
 		FormatEx(sBuffer, sizeof(sBuffer), "sound/%s", g_sWarnSoundPath);
 		if(FileExists(sBuffer, true) || FileExists(sBuffer))
@@ -212,25 +144,21 @@ public void OnMapStart()
 			else
 				PrecacheSound(g_sWarnSoundPath, true);
 		}
-<<<<<<< HEAD
-    }
-    if(g_bDeleteExpired)
-        CheckExpiredWarns();
-=======
 	}
->>>>>>> pre-release
+	if(g_bDeleteExpired)
+		CheckExpiredWarns();
 }
 
 public void OnAdminMenuReady(Handle hTopMenu) {InitializeMenu(hTopMenu);}
 
 public void OnClientAuthorized(int iClient) {
   IsClientInGame(iClient) &&
-    LoadPlayerData(iClient);
+	LoadPlayerData(iClient);
 }
 
 public void OnClientPutInServer(int iClient) {
   IsClientAuthorized(iClient) &&
-    LoadPlayerData(iClient);
+	LoadPlayerData(iClient);
 }
 
 //---------------------------------------------------SOME FEATURES-------------------------------------------------
@@ -243,7 +171,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
-        }
+		}
 }
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
@@ -293,7 +221,7 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 					ForcePlayerSuicide(iClient);
 				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
-			case 4:
+			case 4: 
 				PunishmentSix(iClient, iAdmin, sReason);
 			case 5:
 			{
@@ -329,13 +257,9 @@ public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }
 
-<<<<<<< HEAD
-stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient)); }
+stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }
 stock void GetPort() { g_iPort=FindConVar("hostport").IntValue; }
 stock void GetIPServer() { 
-    int iHostIP = FindConVar("hostip").IntValue;
-    FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
+	int iHostIP = FindConVar("hostip").IntValue;
+	FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
 }
-=======
-stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient)); }
->>>>>>> pre-release
