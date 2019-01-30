@@ -4,3 +4,5 @@
 !/scripting/WarnSystem.sp
 !/scripting/NativeExample.sp
 !/scripting/WS_Sourcebans.sp
+*.exe
+*.dat
