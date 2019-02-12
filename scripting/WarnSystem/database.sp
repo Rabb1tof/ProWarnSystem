@@ -457,7 +457,7 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 		WarnSystem_OnClientWarn(iAdmin, iClient, iScore, iTime, sReason);
 		
 		//We don't need to fuck db because we cached warns.
-		if (g_iWarnings[iClient] >= g_iMaxWarns)
+		if (g_iWarnings[iClient] >= g_iMaxWarns || g_iScore[iClient] >= g_iMaxScore)
 		{
 			if(g_bResetWarnings){
 				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
