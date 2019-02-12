@@ -1,9 +1,9 @@
 //---------------------------------DEFINES--------------------------------
 #pragma semicolon 1
 
-#define PLUGIN_NAME         "[WarnSystem] Core"
+#define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4-dev"
+#define PLUGIN_VERSION      "1.4.1-pro-dev"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -28,17 +28,18 @@ char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PA
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
 bool g_bIsFuckingGame;
+ArrayList g_aReason;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1], g_iPort;
+int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1], g_iPort, g_iScore[MAXPLAYERS+1];
 
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
-#if defined _SteamWorks_Included
+//#if defined _SteamWorks_Included
 #include "WarnSystem/stats.sp"
-#endif 
+//#endif 
 
 #pragma newdecls required
 
@@ -48,6 +49,7 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
 #include "WarnSystem/commands.sp"
+#include "WarnSystem/configs.sp"
 #include "WarnSystem/menus.sp"
 
 public Plugin myinfo =
@@ -69,10 +71,6 @@ public void OnPluginStart()
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
 	
-	BuildPath(Path_SM, g_sPathWarnReasons, sizeof(g_sPathWarnReasons), "configs/WarnSystem/WarnReasons.cfg");
-	BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnWarnReasons.cfg");
-	BuildPath(Path_SM, g_sPathResetReasons, sizeof(g_sPathResetReasons), "configs/WarnSystem/ResetWarnReasons.cfg");
-	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
 	if(!DirExists(g_sLogPath))
 		CreateDirectory(g_sLogPath, 511);
@@ -82,12 +80,13 @@ public void OnPluginStart()
 	InitializeConVars();
 	InitializeDatabase();
 	InitializeCommands();
+	InitializeConfig();
 	
-	#if defined _SteamWorks_Included
+	//#if defined _SteamWorks_Included
 	// Stats work
 	if (LibraryExists("SteamWorks"))
 		SteamWorks_SteamServersConnected();
-	#endif
+	//#endif
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -122,13 +121,15 @@ public void OnLibraryRemoved(const char[] sName)
 
 public void OnMapStart()
 {
-	#if defined _SteamWorks_Included
+	//#if defined _SteamWorks_Included
 	// Stats work
 	if (LibraryExists("SteamWorks"))
 		SteamWorks_SteamServersConnected();
-	#endif
+	//#endif
 	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);*/
+	
+	InitializeConfig();
 	if(g_bWarnSound)
 	{
 		char sBuffer[PLATFORM_MAX_PATH];
@@ -202,7 +203,7 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
 		}
 }
 
-public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
+public void PunishPlayer(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iPunishment)
@@ -222,7 +223,7 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 4: 
-				PunishmentSix(iClient, iAdmin, sReason);
+				PunishmentSix(iClient, iAdmin, iScore, iTime, sReason);
 			case 5:
 			{
 				char sKickReason[129];
@@ -242,19 +243,34 @@ public void PunishPlayer(int iAdmin, int iClient, char sReason[129])
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected punishment with custom module but module doesn't exists.");
-					PunishmentSix(iClient, iAdmin, sReason);
+					PunishmentSix(iClient, iAdmin, iScore, iTime, sReason);
 				}
 			}
 		}
 
 }
 
-public void PunishmentSix(int iClient, int iAdmin, char[] szReason)
+public void PunishmentSix(int iClient, int iAdmin, int iScore, int iTime, char[] szReason)
 {
 	if (IsPlayerAlive(iClient))
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
-	BuildAgreement(iClient, iAdmin, szReason);
+	BuildAgreement(iClient, iAdmin, iScore, iTime, szReason);
 	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+}
+
+void UTIL_CleanMemory() {
+    if (!g_aReason) {
+        g_aReason = new ArrayList(ByteCountToCells(4));
+        return;
+    }
+
+    int iLength = g_aReason.Length;
+    for (int i = iLength-1; i >= 0; i--) {
+        StringMap hMap = g_aReason.Get(i);
+
+        delete hMap;
+        g_aReason.Erase(i);
+    }
 }
 
 stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }

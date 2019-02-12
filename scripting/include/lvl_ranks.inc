@@ -3,11 +3,17 @@
 #endif
 #define _levelsranks_included_
 
-#define PLUGIN_VERSION "v2.5.3"
+#define PLUGIN_VERSION "v2.5.4.1"
 
 #define ST_VALUE 0
 #define ST_RANK 1
 #define ST_KILLS 2
+#define ST_DEATHS 3
+#define ST_SHOOTS 4
+#define ST_HITS 5
+#define ST_HEADSHOTS 6
+#define ST_ASSISTS 7
+#define ST_PLAYTIME 8
 
 char		g_sColorsBefore[][] = {"{WHITE}", "{RED}", "{GREEN}", "{LIME}", "{LIGHTGREEN}", "{LIGHTRED}", "{GRAY}", "{LIGHTOLIVE}", "{OLIVE}", "{LIGHTBLUE}", "{BLUE}", "{PURPLE}"},
 		g_sColorsCSGO[][] = {"\x01", "\x02", "\x04", "\x05", "\x06", "\x07", "\x08", "\x09", "\x10", "\x0B", "\x0C", "\x0E"};
@@ -136,11 +142,6 @@ forward void LR_OnSettingsModuleUpdate();
 forward void LR_OnDatabaseLoaded();
 
 /**
- * Called when a player was successfully loaded or added.
- */
-forward void LR_OnPlayerLoaded(int iClient);
-
-/**
  * Called when a list opens Settings
  */
 forward void LR_OnMenuCreated(int iClient, Menu& hMenu);
@@ -178,6 +179,16 @@ forward void LR_OnMenuItemSelectedAdmin(int iClient, const char[] sInfo);
  * @param bUp	-	If true, the level has risen, otherwise it has gone down.
  */
 forward void LR_OnLevelChanged(int iClient, int iNewLevel, bool bUp);
+
+/**
+ * Called when a player was successfully loaded or added.
+ */
+forward void LR_OnPlayerLoaded(int iClient);
+
+/**
+ * Called when a player is saved
+ */
+forward void LR_OnPlayerSaved(int iClient, Transaction& hQuery);
 
 stock void LR_PrintToChat(int iClient, char[] szMessage, any ...)
 {
@@ -292,7 +303,6 @@ public void __pl_levelsranks_SetNTVOptional()
 	MarkNativeAsOptional("LR_GetClientPos");
 	MarkNativeAsOptional("LR_GetClientInfo");
 	MarkNativeAsOptional("LR_ChangeClientValue");
-	MarkNativeAsOptional("LR_SetClientValue");
 	MarkNativeAsOptional("LR_SetMultiplierValue");
 	MarkNativeAsOptional("LR_RoundWithoutValue");
 	MarkNativeAsOptional("LR_MenuInventory");
