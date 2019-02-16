@@ -218,6 +218,13 @@
         "en"        "Reason: {1}"
         "ru"        "Причина: {1}"
     }
+	
+	"WS_InfoScore"
+	{
+		"#format"	"{1:d}"
+		"en"		"Score: {1}"
+		"ru"		"Баллы: {1}"
+	}
     
     "WS_InfoExpired"
     {

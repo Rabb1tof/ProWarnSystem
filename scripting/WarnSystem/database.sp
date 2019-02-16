@@ -4,12 +4,12 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 		`account_id` INTEGER PRIMARY KEY NOT NULL, \
 		`username` VARCHAR(64) NOT NULL default '', \
 		`warns` INTEGER(10) NOT NULL DEFAULT '0', \
-		`score` INTEGER NOT NULL DEFAULT '0');",
+		`score` INTEGER DEFAULT '0');",
 	g_sSQL_CreateTablePlayers_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_player` (\
   `account_id` int(10) unsigned NOT NULL COMMENT 'Steam Account ID',\
   `username` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unnamed',\
   `warns` int(10) unsigned NOT NULL DEFAULT '0',\
-  `score`, smallint(6) unsigned NOT NULL DEFAULT '0',\
+  `score` smallint(6) unsigned DEFAULT '0',\
   PRIMARY KEY (`account_id`)\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Перечень всех игроков';",
 	g_sSQL_CreateTableWarns_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_warn` ( \
@@ -18,7 +18,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
   `client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',\
   `server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',\
   `reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',\
-  `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение', \
+  `score` smallint(6) unsigned DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение', \
   `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
   `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
   `deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
@@ -37,7 +37,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	`client_id` INTEGER NOT NULL, \
 	`server_id` INTEGER NOT NULL, \
 	`reason` VARCHAR(128) NOT NULL, \
-	`score` INTEGER NOT NULL, \
+	`score` INTEGER, \
 	`created_at` INTEGER NOT NULL, \
 	`expires_at` INTEGER NOT NULL, \
 	`deleted` TINYINT NOT NULL DEFAULT '0', \
@@ -57,7 +57,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	g_sSQL_WarnPlayerP[] = "UPDATE `ws_player` SET `username` = '%s', `warns` = '%i', `score` = '%i' WHERE `account_id` = '%i';",
 	g_sSQL_DeleteWarns[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `client_id` = '%i';",
 	g_sSQL_DeleteExpired[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `expires_at` <= '%i' AND `expires_at` <> '0';",
-	g_sSQL_SelectWarns[] = "SELECT `ws_warn`.`warn_id`, `player`.`score`, `ws_warn`.`score` FROM `ws_warn` \
+	g_sSQL_SelectWarns[] = "SELECT `ws_warn`.`warn_id`, `ws_warn`.`score` FROM `ws_warn` \
 INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id`\
 WHERE `client_id` = '%i' AND `server_id` = '%i' AND `deleted` = '0';",
@@ -124,8 +124,8 @@ public void InitializeDatabase()
 		g_hDatabase.SetCharset("utf8");
 		//SQL_LockDatabase(g_hDatabase);
 		Transaction hTxn = new Transaction();
-		hTxn.AddQuery(g_sSQL_CreateTablePlayers_SQLite);
-		hTxn.AddQuery(g_sSQL_CreateTableWarns_SQLite);
+		hTxn.AddQuery(g_sSQL_CreateTablePlayers_SQLite); // 0 
+		hTxn.AddQuery(g_sSQL_CreateTableWarns_SQLite); // 1
 		g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
 		//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTablePlayers_SQLite);
 		//g_hDatabase.Query(SQL_CheckError, g_sSQL_CreateTableWarns_SQLite);
@@ -170,9 +170,8 @@ public void SQL_TransactionSuccefully(Database hDatabase, any data, int iNumQuer
 	FormatEx(szBuffer, sizeof(szBuffer), "[WarnSystem] Transaction '%s' succefully done.", szQuery);
 	PrintToServer(szBuffer);
 	PrintToServer("-----------------------------------------------------");
-	if(queryData[1] == 5) {
-		GetServerID(); PrintToServer("Debug");
-	}
+	if(queryData[1] == 5) 
+		GetServerID();
 }
 
 public void SQL_TransactionFailed(Database hDatabase, any data, int iNumQueries, const char[] szError, int iFailIndex, any[] queryData)
@@ -283,14 +282,14 @@ public void SQL_CheckData(Database hDatabase, DBResultSet hDatabaseResults, cons
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient], g_iScore[iClient]);
 		//PrintToServer("%i %s %i", g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient]);
 		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			LogQuery("SQL_UnWarnPlayer::SQL_CheckData: %s", dbQuery);
 		g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
 		return;
 	}
 	else {
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, g_iAccountID[iClient], g_iAccountID[iClient], sEscapedClientName, g_iAccountID[iClient]);
 		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			LogQuery("SQL_UnWarnPlayer::SQL_CheckData: %s", dbQuery);
 		g_hDatabase.Query(SQL_UpdateData, dbQuery, iClient);
 		return;
 	}
@@ -307,7 +306,7 @@ public void SQL_UploadData(Database hDatabase, DBResultSet hDatabaseResults, con
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			LogQuery("SQL_UnWarnPlayer::SQL_UploadData: %s", dbQuery);
 		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
 	}
 }
@@ -323,7 +322,7 @@ public void SQL_UpdateData(Database hDatabase, DBResultSet hDatabaseResults, con
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
+			LogQuery("SQL_UnWarnPlayer::SQL_UpdateData: %s", dbQuery);
 		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
 	}
 }
@@ -338,7 +337,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	
 	//while (hDatabaseResults.FetchRow())
 	
-	else if (hDatabaseResults.HasResults)
+	else if (hDatabaseResults.FetchRow())
 	{
 		g_iWarnings[iClient] = hDatabaseResults.FetchInt(0);
 		g_iScore[iClient] = hDatabaseResults.FetchInt(1);

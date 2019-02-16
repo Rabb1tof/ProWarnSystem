@@ -37,6 +37,7 @@ bool InitializeConfig()
 			LogToFile("Parser encountered error: %s", sError);
 		}
 		CloseHandle(g_smcCfgWarnParser);
+		g_smcCfgWarnParser = null;
 		return (err == SMCError_Okay);
 	}
 	
@@ -59,6 +60,7 @@ bool InitializeConfig()
 			LogToFile("Parser encountered error: %s", sError);
 		}
 		CloseHandle(g_smcCfgUnwarnParser);
+		g_smcCfgUnwarnParser = null;
 		return (err == SMCError_Okay);
 	}
 	
@@ -81,6 +83,7 @@ bool InitializeConfig()
 			LogToFile("Parser encountered error: %s", sError);
 		}
 		CloseHandle(g_smcCfgResetParser);
+		g_smcCfgResetParser = null;
 		return (err == SMCError_Okay);
 	}
 	return false;
@@ -186,20 +189,22 @@ public SMCResult Config_EndSection(SMCParser hParser)
 		g_iWarnState = State_None;
 	else if (g_iWarnState == State_ReasonName) {
 		g_iWarnState = State_Main;
-		g_aReason.Push(g_smTrie);
+		g_aWarn.Push(g_smTrie);
 	}
 	else if (g_iUnwarnState == State_Main)
 		g_iUnwarnState = State_None;
 	else if (g_iUnwarnState == State_ReasonName) {
 		g_iUnwarnState = State_Main;
-		g_aReason.Push(g_smTrie);
+		g_aUnwarn.Push(g_smTrie);
 	}
 	else if (g_iResetState == State_Main)
 		g_iResetState = State_None;
 	else if (g_iResetState == State_ReasonName) {
 		g_iResetState = State_Main;
-		g_aReason.Push(g_smTrie);
+		g_aResetWarn.Push(g_smTrie);
 	}
+	CloseHandle(g_smTrie);
+	g_smTrie = null;
 }
 
 public void Config_End(SMCParser hParser, bool bHalted, bool bFailed) 

@@ -230,8 +230,8 @@ public void DisplayWarnReasons(int iClient)
 	Menu hMenu = new Menu(MenuHandler_PreformWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	
-	for(int i = 0; i < g_aReason.Length; i++) {
-		StringMap hWarn = g_aReason.Get(i);
+	for(int i = 0; i < g_aWarn.Length; i++) {
+		StringMap hWarn = g_aWarn.Get(i);
 		if(!hWarn.GetString("warn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
@@ -244,7 +244,7 @@ public void DisplayWarnReasons(int iClient)
 			iTime = 0;
 		
 		if(!hWarn.GetValue("score", iScore))
-			iScore = 0;
+			iScore = 0; 
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "[%i] %s", iScore, sReason);
 		/*DataPack dWarnpack = new DataPack();
@@ -283,8 +283,8 @@ public void DisplayUnWarnReasons(int iClient)
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	hMenu.ExitBackButton = true;
 	
-	for(int i = 0; i < g_aReason.Length; i++) {
-		StringMap hUnwarn = g_aReason.Get(i);
+	for(int i = 0; i < g_aUnwarn.Length; i++) {
+		StringMap hUnwarn = g_aUnwarn.Get(i);
 		if(!hUnwarn.GetString("unwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
@@ -322,8 +322,8 @@ public void DisplayResetWarnReasons(int iClient)
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	hMenu.ExitBackButton = true;
 	
-	for(int i = 0; i < g_aReason.Length; i++) {
-		StringMap hResetwarn = g_aReason.Get(i);
+	for(int i = 0; i < g_aResetWarn.Length; i++) {
+		StringMap hResetwarn = g_aResetWarn.Get(i);
 		if(!hResetwarn.GetString("resetwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
@@ -361,8 +361,8 @@ public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, in
 			char szInfo[129], szReason[129];
 			int iScore, iTime;
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
-			for(int i = 0; i < g_aReason.Length; i++) {
-				StringMap hWarn = g_aReason.Get(i);
+			for(int i = 0; i < g_aWarn.Length; i++) {
+				StringMap hWarn = g_aWarn.Get(i);
 				if(!hWarn.GetString("warn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo) && !hWarn.GetValue("time", iTime) && !hWarn.GetValue("score", iScore)) {
 					ReplyToCommand(param1, "[WS] Failed given warning...");
 					return;
@@ -387,8 +387,8 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 		{
 			char szInfo[129], szReason[129];
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
-			for(int i = 0; i < g_aReason.Length; i++) {
-				StringMap hUnwarn = g_aReason.Get(i);
+			for(int i = 0; i < g_aUnwarn.Length; i++) {
+				StringMap hUnwarn = g_aUnwarn.Get(i);
 				if(!hUnwarn.GetString("unwarn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo)) {
 					ReplyToCommand(param1, "[WS] Failed unwarning...");
 					return;
@@ -413,8 +413,8 @@ public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param
 		{
 			char szInfo[129], szReason[129];
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
-			for(int i = 0; i < g_aReason.Length; i++) {
-				StringMap hResetwarn = g_aReason.Get(i);
+			for(int i = 0; i < g_aResetWarn.Length; i++) {
+				StringMap hResetwarn = g_aResetWarn.Get(i);
 				if(!hResetwarn.GetString("resetwarn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo)) {
 					ReplyToCommand(param1, "[WS] Failed reset warning(s)...");
 					return;

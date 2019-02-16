@@ -28,7 +28,7 @@ char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PA
 	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
 bool g_bIsFuckingGame;
-ArrayList g_aReason;
+ArrayList g_aWarn, g_aUnwarn, g_aResetWarn;
 
 Database g_hDatabase;
 
@@ -259,18 +259,44 @@ public void PunishmentSix(int iClient, int iAdmin, int iScore, int iTime, char[]
 }
 
 void UTIL_CleanMemory() {
-    if (!g_aReason) {
-        g_aReason = new ArrayList(ByteCountToCells(4));
-        return;
-    }
+	if (!g_aWarn) {
+		g_aWarn = new ArrayList(ByteCountToCells(4));
+		return;
+	}
 
-    int iLength = g_aReason.Length;
-    for (int i = iLength-1; i >= 0; i--) {
-        StringMap hMap = g_aReason.Get(i);
+	int iLength = g_aWarn.Length;
+	for (int i = iLength-1; i >= 0; i--) {
+		StringMap hMap = g_aWarn.Get(i);
 
-        delete hMap;
-        g_aReason.Erase(i);
-    }
+		delete hMap;
+		g_aWarn.Erase(i);
+	}
+	
+	if (!g_aUnwarn) {
+		g_aUnwarn = new ArrayList(ByteCountToCells(4));
+		return;
+	}
+
+	iLength = g_aUnwarn.Length;
+	for (int i = iLength-1; i >= 0; i--) {
+		StringMap hMap = g_aUnwarn.Get(i);
+
+		delete hMap;
+		g_aUnwarn.Erase(i);
+	}
+	
+	if (!g_aResetWarn) {
+		g_aResetWarn = new ArrayList(ByteCountToCells(4));
+		return;
+	}
+
+	iLength = g_aResetWarn.Length;
+	for (int i = iLength-1; i >= 0; i--) {
+		StringMap hMap = g_aResetWarn.Get(i);
+
+		delete hMap;
+		g_aResetWarn.Erase(i);
+	}
 }
 
 stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }
