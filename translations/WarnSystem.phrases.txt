@@ -7,7 +7,7 @@
     
     "WS_ColoredPrefix"
     {
-        "en"		"{lightgreen}[WarnSystem]{default}"
+        "en"		"{blue}[{red}WarnSystem{blue}]{default}"
     }
     
     //---------------------------------WarnSystem.sp----------------------------
@@ -34,12 +34,12 @@
     
     "WS_Message"
     {
-        "en"		"{lightred}You have been issued a warning. Follow the rules or further actions will be taken."
-        "ru"		"{lightred}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
-        "fr"		"{lightred}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
-        "de"		"{lightred}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
-        "sv"		"{lightred}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
-        "nl"		"{lightred}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
+        "en"		"{red}You have been issued a warning. Follow the rules or further actions will be taken."
+        "ru"		"{red}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
+        "fr"		"{red}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
+        "de"		"{red}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
+        "sv"		"{red}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
+        "nl"		"{red}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
     }
     
     "WS_PunishKick"
@@ -101,8 +101,8 @@
     
     "WS_CantTargetYourself"
     {
-        "en"		"{lightred}Can't target yourself."
-        "ru"		"{lightred}Нельзя выбрать самого себя."
+        "en"		"{red}Can't target yourself."
+        "ru"		"{red}Нельзя выбрать самого себя."
     }
     
     "WS_UnWarnPlayer"

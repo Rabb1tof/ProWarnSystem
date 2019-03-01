@@ -1,214 +1,161 @@
-SMCParser g_smcCfgWarnParser, g_smcCfgUnwarnParser, g_smcCfgResetParser;
 StringMap g_smTrie;
 
 enum ReasonState 
 {
 	State_None,
 	State_Main,
-	State_ReasonName
+	State_Name
 }
-ReasonState g_iWarnState = State_None, g_iUnwarnState = State_None, g_iResetState = State_None;
+ReasonState g_iState = State_None;
 
-bool InitializeConfig()
+void InitializeConfig()
 {
 	UTIL_CleanMemory();
-	BuildPath(Path_SM, g_sPathWarnReasons, sizeof(g_sPathWarnReasons), "configs/WarnSystem/WarnReasons.cfg");
-	BuildPath(Path_SM, g_sPathUnwarnReasons, sizeof(g_sPathUnwarnReasons), "configs/WarnSystem/UnwarnReasons.cfg");
-	BuildPath(Path_SM, g_sPathResetReasons, sizeof(g_sPathResetReasons), "configs/WarnSystem/ResetWarnReasons.cfg");
+
+	bool bResult =	UTIL_ParseConfig("WarnReasons.cfg", OnKV_WReasons, OnNewSection, OnLS_WReasons) &&
+					UTIL_ParseConfig("UnwarnReasons.cfg", OnKV_UReasons, OnNewSection, OnLS_UReasons) &&
+					UTIL_ParseConfig("ResetWarnReasons.cfg", OnKV_RReasons, OnNewSection, OnLS_RReasons);
 	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
-	
-	
-	//------------------------------------------Warnings Parser---------------------------------------------
-	if (g_smcCfgWarnParser == null)
-		g_smcCfgWarnParser = new SMCParser();
-	if (FileExists(g_sPathWarnReasons)) 
+					//UTIL_ParseConfig("WarnAgreement.cfg", OnKV_Agreement, OnNewSection, OnEndSection);
+
+	if (!bResult)
 	{
-		g_iWarnState = State_None;
-		SMC_SetReaders(g_smcCfgWarnParser, Warn_NewSection, Warn_KeyValue, Config_EndSection);
-		SMC_SetParseEnd(g_smcCfgWarnParser, Config_End);
-		int iLine, iCol;
-		SMCError err = g_smcCfgWarnParser.ParseFile(g_sPathWarnReasons, iLine, iCol);
-		
-		if (err != SMCError_Okay)
-		{
-			char sError[256];
-			g_smcCfgWarnParser.GetErrorString(err, sError, sizeof(sError));
-			LogWarnings("Could not parse file (line %d, col %d    file \"%s\"):", iLine, iCol, g_sPathWarnReasons);
-			LogToFile("Parser encountered error: %s", sError);
-		}
-		CloseHandle(g_smcCfgWarnParser);
-		g_smcCfgWarnParser = null;
-		return (err == SMCError_Okay);
+		SetFailState("Something went wrong. Check logs.");
 	}
-	
-	//------------------------------------------Unwarnings Parser---------------------------------------------
-	if(g_smcCfgUnwarnParser == null)
-		g_smcCfgUnwarnParser = new SMCParser();
-	if(FileExists(g_sPathUnwarnReasons))
-	{
-		g_iUnwarnState = State_None;
-		SMC_SetReaders(g_smcCfgUnwarnParser, Unwarn_NewSection, Unwarn_KeyValue, Config_EndSection);
-		SMC_SetParseEnd(g_smcCfgUnwarnParser, Config_End);
-		int iLine, iCol;
-		SMCError err = g_smcCfgUnwarnParser.ParseFile(g_sPathUnwarnReasons, iLine, iCol);
-		
-		if (err != SMCError_Okay)
-		{
-			char sError[256];
-			g_smcCfgUnwarnParser.GetErrorString(err, sError, sizeof(sError));
-			LogWarnings("Could not parse file (line %d, col %d    file \"%s\"):", iLine, iCol, g_sPathUnwarnReasons);
-			LogToFile("Parser encountered error: %s", sError);
-		}
-		CloseHandle(g_smcCfgUnwarnParser);
-		g_smcCfgUnwarnParser = null;
-		return (err == SMCError_Okay);
-	}
-	
-	//------------------------------------------Reset Warnings Parser---------------------------------------------
-	if(g_smcCfgResetParser == null)
-		g_smcCfgResetParser = new SMCParser();
-	if(FileExists(g_sPathResetReasons))
-	{
-		g_iUnwarnState = State_None;
-		SMC_SetReaders(g_smcCfgResetParser, Resetwarn_NewSection, Resetwarn_KeyValue, Config_EndSection);
-		SMC_SetParseEnd(g_smcCfgResetParser, Config_End);
-		int iLine, iCol;
-		SMCError err = g_smcCfgResetParser.ParseFile(g_sPathResetReasons, iLine, iCol);
-		
-		if (err != SMCError_Okay)
-		{
-			char sError[256];
-			g_smcCfgResetParser.GetErrorString(err, sError, sizeof(sError));
-			LogWarnings("Could not parse file (line %d, col %d    file \"%s\"):", iLine, iCol, g_sPathResetReasons);
-			LogToFile("Parser encountered error: %s", sError);
-		}
-		CloseHandle(g_smcCfgResetParser);
-		g_smcCfgResetParser = null;
-		return (err == SMCError_Okay);
-	}
-	return false;
 }
 
-public SMCResult Warn_NewSection(SMCParser hParser, const char[] szName, bool bOpt_quotes) {
-	
-	if (StrEqual(szName, "Warn Reasons"))	
-		g_iWarnState = State_Main;
-	else if (g_iWarnState == State_Main) {
-		g_iWarnState = State_ReasonName;
-		g_smTrie = new StringMap();
-	}
-	return SMCParse_Continue;
-}
-
-public SMCResult Warn_KeyValue(SMCParser hParser, const char[] szKey, const char[] szValue, bool bKey_quotes, bool bValue_quotes)
+bool UTIL_ParseConfig(const char[] szFileName,
+    SMC_KeyValue fnOnKv,
+    SMC_NewSection fnOnES,
+    SMC_EndSection fnOnLS)
 {
-	if (g_iWarnState != State_ReasonName) {
-		LogError("Warn_KeyValue(): Unexpected KeyValue. Stopping...");
+	char szPath[PLATFORM_MAX_PATH];
+	BuildPath(Path_SM, szPath, sizeof(szPath), "configs/WarnSystem/%s", szFileName);
+
+	if (!FileExists(szPath))
+		return false;
+
+	g_iState = State_None;
+	SMCParser hSMC = new SMCParser();
+	SMC_SetReaders(hSMC, fnOnES, fnOnKv, fnOnLS);
+
+	int iLine, iCol;
+	SMCError iErr = hSMC.ParseFile(szPath, iLine, iCol);
+	CloseHandle(hSMC);
+
+	if (iErr != SMCError_Okay)
+	{
+		char szErrorDescription[256];
+		SMC_GetErrorString(iErr, szErrorDescription, sizeof(szErrorDescription));
+
+		LogWarnings("Couldn't parse file (%s, line %d, col %d): %s", szFileName, iLine, iCol, szErrorDescription);
+	}
+
+	return (iErr == SMCError_Okay);
+}
+
+public SMCResult OnNewSection(SMCParser hParser, const char[] szName, bool bOpt_quotes) {
+	if (g_iState != State_Main && g_iState != State_None)
+	{
+		// WUT
 		return SMCParse_HaltFail;
 	}
 
-	if (StrEqual(szKey, "Reason")) {
-		g_smTrie.SetString("warn", szValue, true);
-	} else if (StrEqual(szKey, "Time")) {
-		g_smTrie.SetValue("time", StringToInt(szValue), true);
-	} else if (StrEqual(szKey, "Flags")) {
-		g_smTrie.SetString("flags_warn", szValue, true);
-		//g_smTrie.SetValue("Translation", true);
-	} else if (StrEqual(szKey, "Score")) {
-		g_smTrie.SetValue("score", StringToInt(szValue), true);
-	} else {
-		g_smTrie.SetString(szKey, szValue, true);
+	if (g_iState == State_None)
+	{
+		g_iState = State_Main;
+		return SMCParse_Continue;
 	}
 
+	g_iState = State_Name;
+	g_smTrie = new StringMap();
 	return SMCParse_Continue;
 }
 
-public SMCResult Unwarn_NewSection(SMCParser hParser, const char[] szName, bool bOpt_quotes) {
-	
-	if (StrEqual(szName, "Unwarn Reasons"))	
-		g_iUnwarnState = State_Main;
-	else if (g_iUnwarnState == State_Main) {
-		g_iUnwarnState = State_ReasonName;
-		g_smTrie = new StringMap();
-	}
-	return SMCParse_Continue;
-}
+/**
+ * KV Parser defines
+ */
+#define SMC_KVREADER(%0)			public SMCResult %0(SMCParser hSMC, const char[] szKey, const char[] szValue, bool bKeyQuotes, bool bValueQuotes)
+#define SMC_LSREADER(%0)			public SMCResult %0(SMCParser hSMC)
 
-public SMCResult Unwarn_KeyValue(SMCParser hParser, const char[] szKey, const char[] szValue, bool bKey_quotes, bool bValue_quotes)
+#define SMC_KV_CHECKSTATE(%0,%1)	if (g_iState != %0) { LogError(%1); return SMCParse_HaltFail; }
+#define SMC_KV_CHECKNAME()			SMC_KV_CHECKSTATE(State_Name, "OnKV(): Unexpected KeyValue pair. Stopping...")
+#define SMC_KV_RETURN()				return SMCParse_Continue
+
+#define PARSE_GENERIC(%0,%1,%2,%3)	if (!strcmp(szKey, %0)) { g_smTrie.%2(%1, %3, true); }
+#define PARSE_STR(%0,%1,%2)			PARSE_GENERIC(%0,%1, SetString, %2)
+#define PARSE_INT(%0,%1,%2)			PARSE_GENERIC(%0,%1, SetValue, StringToInt(%2))
+
+#define PARSE_REASON(%0)			PARSE_STR("Reason", %0, szValue)
+#define PARSE_TIME()				PARSE_INT("Time", "time", szValue)
+#define PARSE_FLAGS(%0)				PARSE_STR("Flags", "flags_" ... %0, szValue)
+#define PARSE_SCORE()				PARSE_INT("Score", "score", szValue)
+
+SMC_KVREADER(OnKV_WReasons)
 {
-	if (g_iUnwarnState != State_ReasonName) {
-		LogError("Unwarn_KeyValue(): Unexpected KeyValue. Stopping...");
-		return SMCParse_HaltFail;
-	}
+	SMC_KV_CHECKNAME()
 
-	if (StrEqual(szKey, "Reason")) {
-		g_smTrie.SetString("unwarn", szValue, true);
-	} else if (StrEqual(szKey, "Flags")) {
-		g_smTrie.SetString("flags_unwarn", szValue, true);
-		//g_smTrie.SetValue("Translation", true);
-	} else {
-		g_smTrie.SetString(szKey, szValue, true);
-	}
+	PARSE_REASON("warn")
+	PARSE_TIME()
+	PARSE_FLAGS("warn")
+	PARSE_SCORE()
 
-	return SMCParse_Continue;
+	SMC_KV_RETURN();
 }
 
-public SMCResult Resetwarn_NewSection(SMCParser hParser, const char[] szName, bool bOpt_quotes) {
-	
-	if (StrEqual(szName, "Resetwarn Reasons"))	
-		g_iResetState = State_Main;
-	else if (g_iResetState == State_Main) {
-		g_iResetState = State_ReasonName;
-		g_smTrie = new StringMap();
-	}
-	return SMCParse_Continue;
-}
-
-public SMCResult Resetwarn_KeyValue(SMCParser hParser, const char[] szKey, const char[] szValue, bool bKey_quotes, bool bValue_quotes)
+SMC_KVREADER(OnKV_UReasons)
 {
-	if (g_iResetState != State_ReasonName) {
-		LogError("Resetwarn_KeyValue(): Unexpected KeyValue. Stopping...");
-		return SMCParse_HaltFail;
-	}
+	SMC_KV_CHECKNAME()
 
-	if (StrEqual(szKey, "Reason")) {
-		g_smTrie.SetString("resetwarn", szValue, true);
-	} else if (StrEqual(szKey, "Flags")) {
-		g_smTrie.SetString("flags_resetwarn", szValue, true);
-		//g_smTrie.SetValue("Translation", true);
-	} else {
-		g_smTrie.SetString(szKey, szValue, true);
-	}
+	PARSE_REASON("unwarn")
+	PARSE_FLAGS("unwarn")
 
-	return SMCParse_Continue;
+	SMC_KV_RETURN();
 }
 
-public SMCResult Config_EndSection(SMCParser hParser) 
+SMC_KVREADER(OnKV_RReasons)
 {
-	if (g_iWarnState == State_Main)
-		g_iWarnState = State_None;
-	else if (g_iWarnState == State_ReasonName) {
-		g_iWarnState = State_Main;
-		g_aWarn.Push(g_smTrie);
-	}
-	else if (g_iUnwarnState == State_Main)
-		g_iUnwarnState = State_None;
-	else if (g_iUnwarnState == State_ReasonName) {
-		g_iUnwarnState = State_Main;
-		g_aUnwarn.Push(g_smTrie);
-	}
-	else if (g_iResetState == State_Main)
-		g_iResetState = State_None;
-	else if (g_iResetState == State_ReasonName) {
-		g_iResetState = State_Main;
-		g_aResetWarn.Push(g_smTrie);
-	}
-	CloseHandle(g_smTrie);
-	g_smTrie = null;
+	SMC_KV_CHECKNAME()
+
+	PARSE_REASON("resetwarn")
+	PARSE_FLAGS("resetwarn")
+
+	SMC_KV_RETURN();
 }
 
-public void Config_End(SMCParser hParser, bool bHalted, bool bFailed) 
+/*SMC_KVREADER(OnKV_Agreement)
+{}*/
+
+SMC_LSREADER(OnLS_WReasons)
 {
-	if (bFailed)
-		SetFailState("Plugin configuration error");
-}  
+	PushWhenLeavedReason(g_aWarn);
+}
+
+SMC_LSREADER(OnLS_UReasons)
+{
+	PushWhenLeavedReason(g_aUnwarn);
+}
+
+SMC_LSREADER(OnLS_RReasons)
+{
+	PushWhenLeavedReason(g_aResetWarn);
+}
+
+SMC_LSREADER(OnEndSection)
+{
+	SMC_KV_RETURN();
+}
+
+void PushWhenLeavedReason(ArrayList hArray)
+{
+	PushOnCondition(State_Name, State_Main, hArray);
+}
+
+void PushOnCondition(ReasonState iRequiredState, ReasonState iNewState, ArrayList hArray)
+{
+	if (g_iState == iRequiredState)
+	{
+		g_iState = iNewState;
+		hArray.Push(g_smTrie);
+	}
+}

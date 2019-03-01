@@ -51,9 +51,9 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 	/*GetCmdArg(3, sBuffer, sizeof(sBuffer));
 	int iScore = StringToInt(sBuffer);*/
 	
-	GetCmdArg(3, sReason, sizeof(sReason));
-	if (iArgs > 3)
-		for (int i = 4; i <= iArgs; ++i)
+	GetCmdArg(2, sReason, sizeof(sReason));
+	if (iArgs > 2)
+		for (int i = 3; i <= iArgs; ++i)
 		{
 			GetCmdArg(i, sBuffer, sizeof(sBuffer));
 			Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);

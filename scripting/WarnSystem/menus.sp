@@ -70,7 +70,7 @@ stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
 	for (int i = 1; i <= MaxClients; ++i)
-		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) /*&& iAdmin != i*/ && CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			if(g_iMaxWarns != 0 && g_iMaxWarns == 0)
@@ -96,9 +96,9 @@ public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -126,9 +126,9 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -155,9 +155,9 @@ public int MenuHandler_ResetWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -184,9 +184,9 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 				CheckPlayerWarns(param1, iTarget);
 		}
@@ -276,6 +276,7 @@ public void DisplayWarnReasons(int iClient)
 
 public void DisplayUnWarnReasons(int iClient) 
 {
+	WS_PrintToChat(iClient, "Test");
 	char sReason[129], sDisplay[250], sFlags[13];
 	int iFlags;
 	
@@ -288,7 +289,7 @@ public void DisplayUnWarnReasons(int iClient)
 		if(!hUnwarn.GetString("unwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hUnwarn.GetString("flags_warn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
 		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
@@ -296,6 +297,8 @@ public void DisplayUnWarnReasons(int iClient)
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
+	
+
 	
 	/*Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
 	if (!hFilePath)
@@ -315,6 +318,7 @@ public void DisplayUnWarnReasons(int iClient)
 
 public void DisplayResetWarnReasons(int iClient) 
 {
+	WS_PrintToChatAll("Test2");
 	char sReason[129], sDisplay[250], sFlags[13];
 	int iFlags;
 	
@@ -327,7 +331,7 @@ public void DisplayResetWarnReasons(int iClient)
 		if(!hResetwarn.GetString("resetwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hResetwarn.GetString("flags_warn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
 		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
@@ -363,12 +367,11 @@ public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, in
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
 			for(int i = 0; i < g_aWarn.Length; i++) {
 				StringMap hWarn = g_aWarn.Get(i);
-				if(!hWarn.GetString("warn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo) && !hWarn.GetValue("time", iTime) && !hWarn.GetValue("score", iScore)) {
-					ReplyToCommand(param1, "[WS] Failed given warning...");
-					return;
+				if(hWarn.GetString("warn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo) && hWarn.GetValue("time", iTime) && hWarn.GetValue("score", iScore)) {
+					WarnPlayer(param1, g_iTarget[param1], iScore, iTime, szReason);
+					break;
 				}
 			}
-			WarnPlayer(param1, g_iTarget[param1], iScore, iTime, szReason);
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -389,12 +392,11 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
 			for(int i = 0; i < g_aUnwarn.Length; i++) {
 				StringMap hUnwarn = g_aUnwarn.Get(i);
-				if(!hUnwarn.GetString("unwarn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo)) {
-					ReplyToCommand(param1, "[WS] Failed unwarning...");
-					return;
+				if(hUnwarn.GetString("unwarn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo)) {
+					UnWarnPlayer(param1, g_iTarget[param1], szReason);
+					break;
 				}
 			}
-			UnWarnPlayer(param1, g_iTarget[param1], szReason);
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -415,12 +417,11 @@ public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param
 			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
 			for(int i = 0; i < g_aResetWarn.Length; i++) {
 				StringMap hResetwarn = g_aResetWarn.Get(i);
-				if(!hResetwarn.GetString("resetwarn", szReason, sizeof(szReason)) && !StrEqual(szReason, szInfo)) {
-					ReplyToCommand(param1, "[WS] Failed reset warning(s)...");
-					return;
+				if(hResetwarn.GetString("resetwarn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo)) {
+					ResetPlayerWarns(param1, g_iTarget[param1], szReason);
+					break;
 				}
 			}
-			ResetPlayerWarns(param1, g_iTarget[param1], szReason);
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -449,7 +450,7 @@ public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[
 	
 	IntToString(iScore, szScore, sizeof(szScore));
 	GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
-	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iTime);
+	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%X", iTime);
 	
 	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
 		
@@ -472,7 +473,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 {
 	if (action == MenuAction_Select)
 	{
-		CPrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
+		WS_PrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
 		if (IsPlayerAlive(param1))
 			SetEntityMoveType(param1, MOVETYPE_WALK);
 	} else if (action == MenuAction_End)
@@ -495,7 +496,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	if (!hDatabaseResults.RowCount)
 	{
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
+		WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
@@ -503,8 +504,8 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
 	
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
+	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
 	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;

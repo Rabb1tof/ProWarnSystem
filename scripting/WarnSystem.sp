@@ -3,14 +3,16 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4.1-pro-dev"
+#define PLUGIN_VERSION      "1.4-pro-dev"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
 #define PLUGIN_COMPILEDBY   SOURCEMOD_V_MAJOR ... "." ... SOURCEMOD_V_MINOR ... "." ... SOURCEMOD_V_RELEASE
 
-#include <colors>
+//#include <colors>
+#include <csgo_colors>
+#include <morecolors>
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
@@ -24,8 +26,7 @@
 
 //----------------------------------------------------------------------------
 
-char g_sPathWarnReasons[PLATFORM_MAX_PATH], g_sPathUnwarnReasons[PLATFORM_MAX_PATH],
-	 g_sPathResetReasons[PLATFORM_MAX_PATH], g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
+char g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
 bool g_bIsFuckingGame;
 ArrayList g_aWarn, g_aUnwarn, g_aResetWarn;
@@ -37,9 +38,7 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
-//#if defined _SteamWorks_Included
 #include "WarnSystem/stats.sp"
-//#endif 
 
 #pragma newdecls required
 
@@ -71,9 +70,9 @@ public void OnPluginStart()
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
 	
-	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
-	if(!DirExists(g_sLogPath))
-		CreateDirectory(g_sLogPath, 511);
+	//BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
+	if(!DirExists("logs/WarnSystem"))
+		CreateDirectory("logs/WarnSystem", 511);
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
 	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
 	
@@ -82,11 +81,8 @@ public void OnPluginStart()
 	InitializeCommands();
 	InitializeConfig();
 	
-	//#if defined _SteamWorks_Included
-	// Stats work
-	if (LibraryExists("SteamWorks"))
-		SteamWorks_SteamServersConnected();
-	//#endif
+
+	SteamWorks_SteamServersConnected();
 	
 	if (LibraryExists("adminmenu"))
 	{
@@ -121,11 +117,7 @@ public void OnLibraryRemoved(const char[] sName)
 
 public void OnMapStart()
 {
-	//#if defined _SteamWorks_Included
-	// Stats work
-	if (LibraryExists("SteamWorks"))
-		SteamWorks_SteamServersConnected();
-	//#endif
+	SteamWorks_SteamServersConnected();
 	/*for(int iClient = 1; iClient <= MaxClients; ++iClient)
 		LoadPlayerData(iClient);*/
 	
@@ -175,6 +167,22 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 		}
 }
 
+stock void WS_PrintToChat(int iClient, const char[] szFormat, any ...)
+{
+	char szBuffer[MAX_BUFFER_LENGTH];
+	VFormat(szBuffer, sizeof(szBuffer), szFormat, 3);
+	if(g_bIsFuckingGame)	CGOPrintToChat(iClient, szBuffer);
+	else 					CPrintToChat(iClient, szBuffer);
+}
+
+stock void WS_PrintToChatAll(const char[] szFormat, any ...)
+{
+	char szBuffer[MAX_BUFFER_LENGTH];
+	VFormat(szBuffer, sizeof(szBuffer), szFormat, 2);
+	if(g_bIsFuckingGame)	CGOPrintToChatAll(szBuffer);
+	else 					CPrintToChatAll(szBuffer);
+}
+
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
 
 public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
@@ -209,18 +217,18 @@ public void PunishPlayer(int iAdmin, int iClient, int iScore, int iTime, char sR
 		switch (g_iPunishment)
 		{
 			case 1:
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			case 2:
 			{
 				if (IsPlayerAlive(iClient))
 					SlapPlayer(iClient, g_iSlapDamage, true);
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 3:
 			{
 				if (IsPlayerAlive(iClient))
 					ForcePlayerSuicide(iClient);
-				CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+				WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 			}
 			case 4: 
 				PunishmentSix(iClient, iAdmin, iScore, iTime, sReason);
@@ -255,47 +263,25 @@ public void PunishmentSix(int iClient, int iAdmin, int iScore, int iTime, char[]
 	if (IsPlayerAlive(iClient))
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient, iAdmin, iScore, iTime, szReason);
-	CPrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
+	WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
 }
 
 void UTIL_CleanMemory() {
-	if (!g_aWarn) {
-		g_aWarn = new ArrayList(ByteCountToCells(4));
+	UTIL_CleanArrayList(g_aWarn);
+	UTIL_CleanArrayList(g_aUnwarn);
+	UTIL_CleanArrayList(g_aResetWarn);
+}
+
+void UTIL_CleanArrayList(ArrayList &hArr) {
+	if (!hArr) {
+		hArr = new ArrayList(ByteCountToCells(4));
 		return;
 	}
 
-	int iLength = g_aWarn.Length;
+	int iLength = hArr.Length;
 	for (int i = iLength-1; i >= 0; i--) {
-		StringMap hMap = g_aWarn.Get(i);
-
-		delete hMap;
-		g_aWarn.Erase(i);
-	}
-	
-	if (!g_aUnwarn) {
-		g_aUnwarn = new ArrayList(ByteCountToCells(4));
-		return;
-	}
-
-	iLength = g_aUnwarn.Length;
-	for (int i = iLength-1; i >= 0; i--) {
-		StringMap hMap = g_aUnwarn.Get(i);
-
-		delete hMap;
-		g_aUnwarn.Erase(i);
-	}
-	
-	if (!g_aResetWarn) {
-		g_aResetWarn = new ArrayList(ByteCountToCells(4));
-		return;
-	}
-
-	iLength = g_aResetWarn.Length;
-	for (int i = iLength-1; i >= 0; i--) {
-		StringMap hMap = g_aResetWarn.Get(i);
-
-		delete hMap;
-		g_aResetWarn.Erase(i);
+		CloseHandle(hArr.Get(i));
+		hArr.Erase(i);
 	}
 }
 

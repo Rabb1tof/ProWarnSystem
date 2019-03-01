@@ -12,6 +12,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("WarnSystem_GetPlayerInfo", Native_GetPlayerInfo);
 	CreateNative("WarnSystem_PrintToAdmins", Native_PrintToAdmins);
 	CreateNative("WarnSystem_GetMaxWarns", Native_GetMaxWarns);
+	CreateNative("WarnSystem_GetMaxScore", Native_MaxScore);
 	
 	g_hGFwd_OnClientLoaded = CreateGlobalForward("WarnSystem_OnClientLoaded", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
@@ -84,7 +85,8 @@ public int Native_GetPlayerInfo(Handle hPlugin, int iNumParams)
 	return 0;
 }
 
-public int Native_GetMaxWarns(Handle hPlugin, int iNumParams){return g_iMaxWarns;}
+public int Native_GetMaxWarns(Handle hPlugin, int iNumParams) { return g_iMaxWarns; }
+public int Native_MaxScore(Handle hPlugin, int iNumParams) { return g_iMaxScore; }
 
 public int Native_PrintToAdmins(Handle hPlugin, int iNumParams)
 {
