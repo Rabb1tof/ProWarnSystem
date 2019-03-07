@@ -4,11 +4,12 @@ public void InitializeCommands()
 	RegAdminCmd("sm_unwarn", Command_UnWarnPlayer, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_checkwarn", Command_CheckWarnPlayer, ADMFLAG_GENERIC);
 	RegAdminCmd("sm_resetwarn", Command_WarnReset, ADMFLAG_GENERIC);
+	RegAdminCmd("ws_update_sql", Command_UpdateSQL, ADMFLAG_ROOT);
 }
 
 public Action Command_WarnPlayer(int iClient, int iArgs)
 {
-	if (iArgs < 2)
+	if (iArgs < 3)
 	{
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_WarnArguments");
 		return Plugin_Handled;
@@ -19,21 +20,25 @@ public Action Command_WarnPlayer(int iClient, int iArgs)
 	if (!iTarget)
 		return Plugin_Handled;
 	
-	GetCmdArg(2, sReason, sizeof(sReason));
-	if (iArgs > 2)
-		for (int i = 3; i <= iArgs; ++i)
+	GetCmdArg(2, sBuffer, sizeof(sBuffer));
+	int iScore = StringToInt(sBuffer);
+	GetCmdArg(3, sBuffer, sizeof(sBuffer));
+	int iTime = StringToInt(sBuffer);
+	GetCmdArg(4, sReason, sizeof(sReason));
+	if (iArgs > 5)
+		for (int i = 5; i <= iArgs; ++i)
 		{
 			GetCmdArg(i, sBuffer, sizeof(sBuffer));
 			Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
 		}
-	
-	WarnPlayer(iClient, iTarget, sReason);
+		
+	WarnPlayer(iClient, iTarget, iScore, iTime, sReason); // sm_warn <#userid> <score> <time> <reason>
 	return Plugin_Handled;
 }
 
 public Action Command_UnWarnPlayer(int iClient, int iArgs)
 {
-	if (iArgs < 2)
+	if (iArgs < 3)
 	{
 		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_UnWarnArguments");
 		return Plugin_Handled;
@@ -43,6 +48,8 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 	int iTarget = FindTarget(iClient, sBuffer, true, true);
 	if (!iTarget)
 		return Plugin_Handled;
+	/*GetCmdArg(3, sBuffer, sizeof(sBuffer));
+	int iScore = StringToInt(sBuffer);*/
 	
 	GetCmdArg(2, sReason, sizeof(sReason));
 	if (iArgs > 2)
@@ -104,5 +111,25 @@ public Action Command_CheckWarnPlayer(int iClient, int iArgs)
 	if (!iTarget)
 		return Plugin_Handled;
 	CheckPlayerWarns(iClient, iTarget);
+	return Plugin_Handled;
+}
+
+public Action Command_UpdateSQL(int iClient, int iArgs)
+{
+	if(!iArgs && IsValidClient(iClient))
+	{
+		UTIL_DisplayUpdateSQL(iClient);
+		return Plugin_Handled;
+	}
+	char szBuffer[12];
+	GetCmdArg(1, szBuffer, sizeof(szBuffer));
+	if(StrEqual(szBuffer, "mysql")) {
+		UTIL_UpdateSQL(iClient, true);
+	}
+	else if(StrEqual(szBuffer, "sqlite")) {
+		UTIL_UpdateSQL(iClient, false);
+	}
+	else
+		ReplyToCommand(iClient, " %t %t", "WS_Prefix", "WS_InvalidArgument");
 	return Plugin_Handled;
 }
