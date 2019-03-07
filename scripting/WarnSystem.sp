@@ -66,7 +66,7 @@ public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
-	LoadTranslations("WarnSystem.phrases");
+	LoadTranslations("warnsystem.phrases");
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
 	
@@ -160,7 +160,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 {
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
-		if (IsClientInGame(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
+		if (IsValidClient(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
 		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			CPrintToChat(i, "%s", sBuffer);
@@ -171,16 +171,16 @@ stock void WS_PrintToChat(int iClient, const char[] szFormat, any ...)
 {
 	char szBuffer[MAX_BUFFER_LENGTH];
 	VFormat(szBuffer, sizeof(szBuffer), szFormat, 3);
-	if(g_bIsFuckingGame)	CGOPrintToChat(iClient, szBuffer);
-	else 					CPrintToChat(iClient, szBuffer);
+	if(g_bIsFuckingGame)	CGOPrintToChat(iClient, "%s", szBuffer);
+	else 					CPrintToChat(iClient, "%s", szBuffer);
 }
 
 stock void WS_PrintToChatAll(const char[] szFormat, any ...)
 {
 	char szBuffer[MAX_BUFFER_LENGTH];
 	VFormat(szBuffer, sizeof(szBuffer), szFormat, 2);
-	if(g_bIsFuckingGame)	CGOPrintToChatAll(szBuffer);
-	else 					CPrintToChatAll(szBuffer);
+	if(g_bIsFuckingGame)	CGOPrintToChatAll("%s", szBuffer);
+	else 					CPrintToChatAll("%s", szBuffer);
 }
 
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------

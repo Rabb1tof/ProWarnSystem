@@ -69,19 +69,20 @@ public void DisplaySomeoneTargetMenu(int iClient, MenuHandler ptrFunc) {
 stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
-	for (int i = 1; i <= MaxClients; ++i)
-		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) /*&& iAdmin != i*/ && CanUserTarget(iAdmin, i))
+	for (int i = 1; i <= MaxClients; ++i) {
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
-			if(g_iMaxWarns != 0 && g_iMaxWarns == 0)
-				FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
-			else if(g_iMaxWarns & g_iMaxScore != 0)
-				FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i] [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns, g_iScore[i], g_iMaxScore);
-			else if(g_iMaxScore != 0 && g_iMaxWarns == 0)
-				FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iScore[i], g_iMaxScore);
+			switch(g_iWarnType) {
+				case 0: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
+				case 1: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iScore[i], g_iMaxScore);
+				case 2: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i] [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns, g_iScore[i], g_iMaxScore);
+			}
+				
 			IntToString(GetClientUserId(i), sUserId, sizeof(sUserId));
 			hMenu.AddItem(sUserId, sDisplay);
 		}
+	}
 }
 
 public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2) 
@@ -276,7 +277,7 @@ public void DisplayWarnReasons(int iClient)
 
 public void DisplayUnWarnReasons(int iClient) 
 {
-	WS_PrintToChat(iClient, "Test");
+	//WS_PrintToChat(iClient, "Test");
 	char sReason[129], sDisplay[250], sFlags[13];
 	int iFlags;
 	
@@ -318,7 +319,7 @@ public void DisplayUnWarnReasons(int iClient)
 
 public void DisplayResetWarnReasons(int iClient) 
 {
-	WS_PrintToChatAll("Test2");
+	//WS_PrintToChatAll("Test2");
 	char sReason[129], sDisplay[250], sFlags[13];
 	int iFlags;
 	
@@ -521,7 +522,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 		iDate = hDatabaseResults.FetchInt(3);
 		
 		
-		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
+		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%d-%m-%Y %X", iDate);
 		FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
 		hMenu.AddItem(szID, szBuffer);
 	}
