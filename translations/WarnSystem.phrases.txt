@@ -7,7 +7,7 @@
     
     "WS_ColoredPrefix"
     {
-        "en"		"{lightgreen}[WarnSystem]{default}"
+        "en"		"{blue}[{red}WarnSystem{blue}]{default}"
     }
     
     //---------------------------------WarnSystem.sp----------------------------
@@ -34,12 +34,12 @@
     
     "WS_Message"
     {
-        "en"		"{lightred}You have been issued a warning. Follow the rules or further actions will be taken."
-        "ru"		"{lightred}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
-        "fr"		"{lightred}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
-        "de"		"{lightred}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
-        "sv"		"{lightred}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
-        "nl"		"{lightred}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
+        "en"		"{red}You have been issued a warning. Follow the rules or further actions will be taken."
+        "ru"		"{red}Вы получили предупреждение. Соблюдайте правила, либо будут приняты меры."
+        "fr"		"{red}Tu viens de recevoir un avertissement. Respecte les regles ou des sanctions seront prises."
+        "de"		"{red}Du wurdest verwarnt. Halte Dich an die Regeln, oder weitere Konsequenzen werden gezogen."
+        "sv"		"{red}Du har utfärdats en varning. Följ reglerna eller ytterligare åtgärder kommer att vidtas."
+        "nl"		"{red}Je kreeg een waarschuwing. Volg de regels of meerdere acties zullen worden ondernomen."
     }
     
     "WS_PunishKick"
@@ -69,23 +69,23 @@
     "WS_PlayerWarns"
     {
         "#format"	"{1:N},{2:i}"
-        "en"		"{blue}{1} has connected with ({2}) Prior Warnings."
-        "ru"		"{blue}{1} подключился. У него ({2}) активных предупреждений."
-        "fr"		"{blue}{1} connecte avec {2} avertissement(s) en memoire"
-        "de"		"{blue}{1} hat sich mit {2} vergangenen Warnungen verbunden"
-        "sv"		"{blue}{1} anslöt med {2} föregående varning(ar)"
-        "nl"		"{blue}{1} verbond met {2} vorige waarschuwing(en)"
+        "en"		"{blue}{1} {default}has connected with {purple}{2} Prior Warnings."
+        "ru"		"{blue}{1} {default}подключился. У него {purple}{2} активных предупреждений."
+        "fr"		"{blue}{1} {default}connecte avec {purple}{2} avertissement(s) en memoire"
+        "de"		"{blue}{1} {default}hat sich mit {purple}{2} vergangenen Warnungen verbunden"
+        "sv"		"{blue}{1} {default}anslöt med {purple}{2} föregående varning(ar)"
+        "nl"		"{blue}{1} {default}verbond met {purple}{2} vorige waarschuwing(en)"
     }
     
     "WS_WarnPlayer"
     {
         "#format"	"{1:N},{2:N},{3:s}"
-        "en"		"{olive}{1} issued a warning on {2} with reason: {3}"
-        "ru"		"{olive}{1} выдал предупреждение {2}. Причина: {3}"
-        "fr"		"{olive}{1} a donne un avertissement a {2} pour motif: {3}"
-        "de"		"{olive}{1} {2} wurde mit gewarnt mit dem Grund: {3}"
-        "sv"		"{olive}{1} utfärdade en varning på {2} med anledningen: {3}"
-        "nl"		"{olive}{1} heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
+        "en"		"{olive}{1} {default}issued a warning on {2} with reason: {3}"
+        "ru"		"{olive}{1} {default}выдал предупреждение {2}. Причина: {3}"
+        "fr"		"{olive}{1} {default}a donne un avertissement a {2} pour motif: {3}"
+        "de"		"{olive}{1} {default}{2} wurde mit gewarnt mit dem Grund: {3}"
+        "sv"		"{olive}{1} {default}utfärdade en varning på {2} med anledningen: {3}"
+        "nl"		"{olive}{1} {default}heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
     }
     
     "WS_WarnPlayerPersonal"
@@ -101,8 +101,8 @@
     
     "WS_CantTargetYourself"
     {
-        "en"		"{lightred}Can't target yourself."
-        "ru"		"{lightred}Нельзя выбрать самого себя."
+        "en"		"{red}Can't target yourself."
+        "ru"		"{red}Нельзя выбрать самого себя."
     }
     
     "WS_UnWarnPlayer"
@@ -218,6 +218,13 @@
         "en"        "Reason: {1}"
         "ru"        "Причина: {1}"
     }
+	
+	"WS_InfoScore"
+	{
+		"#format"	"{1:d}"
+		"en"		"Score: {1}"
+		"ru"		"Баллы: {1}"
+	}
     
     "WS_InfoExpired"
     {

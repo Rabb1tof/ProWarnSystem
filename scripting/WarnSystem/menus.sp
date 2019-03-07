@@ -59,7 +59,7 @@ public void AdminMenu_CheckWarn(Handle topmenu, TopMenuAction action, TopMenuObj
 }
 
 public void DisplaySomeoneTargetMenu(int iClient, MenuHandler ptrFunc) {
-	Menu hMenu = new Menu(ptrFunc, MenuAction_Select|MenuAction_Cancel|MenuAction_End);
+	Menu hMenu = new Menu(ptrFunc);
 	SetMenuTitle(hMenu, "%T", "WS_TargetMenuTitle", iClient);
 	SetMenuExitBackButton(hMenu, true);
 	AddTargetsToMenuCustom(hMenu, iClient);
@@ -69,14 +69,20 @@ public void DisplaySomeoneTargetMenu(int iClient, MenuHandler ptrFunc) {
 stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
-	for (int i = 1; i <= MaxClients; ++i)
+	for (int i = 1; i <= MaxClients; ++i) {
 		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
-			FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
+			switch(g_iWarnType) {
+				case 0: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns);
+				case 1: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i]", sName, g_iScore[i], g_iMaxScore);
+				case 2: FormatEx(sDisplay, sizeof(sDisplay), "%s [%i/%i] [%i/%i]", sName, g_iWarnings[i], g_iMaxWarns, g_iScore[i], g_iMaxScore);
+			}
+				
 			IntToString(GetClientUserId(i), sUserId, sizeof(sUserId));
 			hMenu.AddItem(sUserId, sDisplay);
 		}
+	}
 }
 
 public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2) 
@@ -91,9 +97,9 @@ public int MenuHandler_Warn(Menu menu, MenuAction action, int param1, int param2
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -121,9 +127,9 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -150,9 +156,9 @@ public int MenuHandler_ResetWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			else if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 			{
 				g_iTarget[param1] = iTarget;
@@ -179,9 +185,9 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
 			
 			if (!(iTarget = GetClientOfUserId(StringToInt(sInfo))))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Player no longer available");
 			if (!CanUserTarget(param1, iTarget))
-				CPrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
+				WS_PrintToChat(param1, " %t %t", "WS_Prefix", "Unable to target");
 			else
 				CheckPlayerWarns(param1, iTarget);
 		}
@@ -194,15 +200,66 @@ public int MenuHandler_CheckWarn(Menu menu, MenuAction action, int param1, int p
 	}
 }
 
+//-----------------------------------Display Update Menu----------------------------------
+void UTIL_DisplayUpdateSQL(int iClient)
+{
+	
+	
+	Menu hMenu = new Menu(Handler_UpdateMenu);
+	hMenu.SetTitle("%T", "WS_UpdateTitle");
+	hMenu.AddItem(NULL_STRING, "MySQL");
+	hMenu.AddItem(NULL_STRING, "SQLite");
+	hMenu.ExitButton = true;
+	hMenu.Display(iClient, 20);
+}
+
+public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iItem)
+{
+	switch(action) {
+		case MenuAction_Select: {
+			if(iItem == 0) UTIL_UpdateSQL(iClient, true);
+			else if(iItem == 1)	UTIL_UpdateSQL(iClient, false);
+		}
+		case MenuAction_End:	CloseHandle(hMenu);
+	}
+}
+
 public void DisplayWarnReasons(int iClient) 
 {
-	char sReason[129];
-	
+	char sReason[129], sFlags[13], sDisplay[250];
+	int iFlags, iScore, iTime;
 	Menu hMenu = new Menu(MenuHandler_PreformWarn);
-	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
-	SetMenuExitBackButton(hMenu, true);
+	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	
-	Handle hFilePath = OpenFile(g_sPathWarnReasons, "rt");
+	for(int i = 0; i < g_aWarn.Length; i++) {
+		StringMap hWarn = g_aWarn.Get(i);
+		if(!hWarn.GetString("warn", sReason, sizeof(sReason)))
+			strcopy(sReason, sizeof(sReason), "Unknown reason");
+		
+		if(!hWarn.GetString("flags_warn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
+		
+		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		
+		if(!hWarn.GetValue("time", iTime))
+			iTime = 0;
+		
+		if(!hWarn.GetValue("score", iScore))
+			iScore = 0; 
+		
+		FormatEx(sDisplay, sizeof(sDisplay), "[%i] %s", iScore, sReason);
+		/*DataPack dWarnpack = new DataPack();
+		dWarnpack.WriteString(sReason);
+		dWarnpack.WriteString(sTime);
+		dWarnpack.WriteCell(iScore);
+		dWarnpack.Reset;*/
+		
+		hMenu.AddItem(sReason, sDisplay);
+	}
+	
+	hMenu.ExitBackButton = true;
+	
+	/*Handle hFilePath = OpenFile(g_sPathWarnReasons, "rt");
 	if (!hFilePath)
 	{
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/WarnReasons.cfg)");
@@ -212,21 +269,39 @@ public void DisplayWarnReasons(int iClient)
 		TrimString(sReason);
 		if (sReason[0])
 			AddMenuItem(hMenu, sReason, sReason);
-	}
+	} 
 	
-	CloseHandle(hFilePath);
+	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
 public void DisplayUnWarnReasons(int iClient) 
 {
-	char sReason[129];
+	//WS_PrintToChat(iClient, "Test");
+	char sReason[129], sDisplay[250], sFlags[13];
+	int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformUnWarn);
-	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
-	SetMenuExitBackButton(hMenu, true);
+	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
+	hMenu.ExitBackButton = true;
 	
-	Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
+	for(int i = 0; i < g_aUnwarn.Length; i++) {
+		StringMap hUnwarn = g_aUnwarn.Get(i);
+		if(!hUnwarn.GetString("unwarn", sReason, sizeof(sReason)))
+			strcopy(sReason, sizeof(sReason), "Unknown reason");
+		
+		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
+		
+		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		
+		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
+		hMenu.AddItem(sReason, sDisplay);
+	}
+	
+
+	
+	/*Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
 	if (!hFilePath)
 	{
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/UnwarnReasons.cfg)");
@@ -238,19 +313,35 @@ public void DisplayUnWarnReasons(int iClient)
 			AddMenuItem(hMenu, sReason, sReason);
 	}
 	
-	CloseHandle(hFilePath);
+	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
 public void DisplayResetWarnReasons(int iClient) 
 {
-	char sReason[129];
+	//WS_PrintToChatAll("Test2");
+	char sReason[129], sDisplay[250], sFlags[13];
+	int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformResetWarn);
-	SetMenuTitle(hMenu, "%T", "WS_AdminMenuReasonTitle", iClient);
-	SetMenuExitBackButton(hMenu, true);
+	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
+	hMenu.ExitBackButton = true;
 	
-	Handle hFilePath = OpenFile(g_sPathResetReasons, "rt");
+	for(int i = 0; i < g_aResetWarn.Length; i++) {
+		StringMap hResetwarn = g_aResetWarn.Get(i);
+		if(!hResetwarn.GetString("resetwarn", sReason, sizeof(sReason)))
+			strcopy(sReason, sizeof(sReason), "Unknown reason");
+		
+		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
+		
+		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		
+		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
+		hMenu.AddItem(sReason, sDisplay);
+	}
+	
+	/*Handle hFilePath = OpenFile(g_sPathResetReasons, "rt");
 	if (!hFilePath)
 	{
 		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/ResetWarnReasons.cfg)");
@@ -262,68 +353,87 @@ public void DisplayResetWarnReasons(int iClient)
 			AddMenuItem(hMenu, sReason, sReason);
 	}
 	
-	CloseHandle(hFilePath);
+	CloseHandle(hFilePath);*/
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_PreformWarn(Handle menu, MenuAction action, int param1, int param2) 
+public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, int param2) 
 {
 	switch(action)
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
-			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			WarnPlayer(param1, g_iTarget[param1], sInfo);
+			char szInfo[129], szReason[129];
+			int iScore, iTime;
+			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
+			for(int i = 0; i < g_aWarn.Length; i++) {
+				StringMap hWarn = g_aWarn.Get(i);
+				if(hWarn.GetString("warn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo) && hWarn.GetValue("time", iTime) && hWarn.GetValue("score", iScore)) {
+					WarnPlayer(param1, g_iTarget[param1], iScore, iTime, szReason);
+					break;
+				}
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
 				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
 			
 		case MenuAction_End:
-			CloseHandle(menu);
+			CloseHandle(hMenu);
 	}
 }
 
-public int MenuHandler_PreformUnWarn(Handle menu, MenuAction action, int param1, int param2) 
+public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, int param2) 
 {
 	switch(action)
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
-			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			UnWarnPlayer(param1, g_iTarget[param1], sInfo);
+			char szInfo[129], szReason[129];
+			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
+			for(int i = 0; i < g_aUnwarn.Length; i++) {
+				StringMap hUnwarn = g_aUnwarn.Get(i);
+				if(hUnwarn.GetString("unwarn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo)) {
+					UnWarnPlayer(param1, g_iTarget[param1], szReason);
+					break;
+				}
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
 				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
 		
 		case MenuAction_End:
-			CloseHandle(menu);
+			CloseHandle(hMenu);
 	}
 }
 
-public int MenuHandler_PreformResetWarn(Handle menu, MenuAction action, int param1, int param2) 
+public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param1, int param2) 
 {
 	switch(action)
 	{
 		case MenuAction_Select:
 		{
-			char sInfo[129];
-			GetMenuItem(menu, param2, sInfo, sizeof(sInfo));
-			ResetPlayerWarns(param1, g_iTarget[param1], sInfo);
+			char szInfo[129], szReason[129];
+			hMenu.GetItem(param2, szInfo, sizeof(szInfo));
+			for(int i = 0; i < g_aResetWarn.Length; i++) {
+				StringMap hResetwarn = g_aResetWarn.Get(i);
+				if(hResetwarn.GetString("resetwarn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo)) {
+					ResetPlayerWarns(param1, g_iTarget[param1], szReason);
+					break;
+				}
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
 				DisplayTopMenu(g_hAdminMenu, param1, TopMenuPosition_LastCategory);
 		
 		case MenuAction_End:
-			CloseHandle(menu);
+			CloseHandle(hMenu);
 	}
 }
 
-public void BuildAgreement(int iClient, int iAdmin, char[] szReason)
+public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[] szReason)
 {
 	Handle hFilePath = OpenFile(g_sPathAgreePanel, "rt");
 	if (!hFilePath)
@@ -332,17 +442,23 @@ public void BuildAgreement(int iClient, int iAdmin, char[] szReason)
 		return;
 	}
 	
-	char sBuffer[128];
+	char sBuffer[128], szAdmin[20], szTimeFormat[128], szScore[8];
 	
 	Handle hMenu = CreatePanel();
 	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementTitle", iClient);
 	SetPanelTitle(hMenu, sBuffer);
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
+	
+	IntToString(iScore, szScore, sizeof(szScore));
+	GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
+	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%X", iTime);
+	
 	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
-		char szAdmin[20];
-		GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
+		
 		ReplaceString(sBuffer, sizeof(sBuffer), "{ADMIN}", szAdmin, false);
 		ReplaceString(sBuffer, sizeof(sBuffer), "{REASON}", szReason, false);
+		ReplaceString(sBuffer, sizeof(sBuffer), "{TIME}", szTimeFormat, false);
+		ReplaceString(sBuffer, sizeof(sBuffer), "{SCORE}", szScore, false);
 		DrawPanelText(hMenu, sBuffer);
 	}
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
@@ -358,7 +474,7 @@ public int MenuHandler_WarnAgreement(Handle hMenu, MenuAction action, int param1
 {
 	if (action == MenuAction_Select)
 	{
-		CPrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
+		WS_PrintToChat(param1, " %t %t", "WS_Prefix", "WS_AgreementMessage");
 		if (IsPlayerAlive(param1))
 			SetEntityMoveType(param1, MOVETYPE_WALK);
 	} else if (action == MenuAction_End)
@@ -381,7 +497,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	if (!hDatabaseResults.RowCount)
 	{
-		CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
+		WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_NotWarned", iClient);
 		return;
 	}
 	
@@ -389,8 +505,8 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
 	
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//CPrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "See console for output");
+	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
+	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
 	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;
@@ -406,7 +522,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 		iDate = hDatabaseResults.FetchInt(3);
 		
 		
-		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
+		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%d-%m-%Y %X", iDate);
 		FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
 		hMenu.AddItem(szID, szBuffer);
 	}
@@ -445,7 +561,7 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 	if(!hDatabaseResults.FetchRow())     return;
 	if(!IsValidClient(iAdmin))      return;
 	char szClient[129], szAdmin[129], szReason[129], szTimeFormat[65], szBuffer[80];
-	int iDate, iExpired;
+	int iDate, iExpired, iScore;
 	
 	//                    0                            1                                 2                              3                      4                  5                       6
 	//`admin`.`account_id` admin_id, `admin`.`username` admin_name, `player`.`account_id` client_id, `player`.`username` client_name, `ws_warn`.`reason` `ws_warn`.`expires_at`, `ws_warn`.`created_at`
@@ -462,8 +578,11 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 	SQL_FetchString(hDatabaseResults, 4, szReason, sizeof(szReason));
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoReason", iAdmin ,szReason);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
-	iExpired = hDatabaseResults.FetchInt(5);
-	iDate    = hDatabaseResults.FetchInt(6);
+	iScore 	 = hDatabaseResults.FetchInt(5);
+	iExpired = hDatabaseResults.FetchInt(6);
+	iDate    = hDatabaseResults.FetchInt(7);
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoScore", iAdmin, iScore);
+	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
 	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iExpired);
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, szTimeFormat);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
