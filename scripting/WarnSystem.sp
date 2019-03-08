@@ -3,7 +3,15 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
+<<<<<<< HEAD
 #define PLUGIN_VERSION      "1.5-pro"
+=======
+<<<<<<< HEAD
+#define PLUGIN_VERSION      "1.4"
+=======
+#define PLUGIN_VERSION      "1.4-pro-dev"
+>>>>>>> dev
+>>>>>>> master
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
