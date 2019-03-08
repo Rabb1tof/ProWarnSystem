@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.4-pro-dev"
+#define PLUGIN_VERSION      "1.5-pro"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -70,8 +70,6 @@ public void OnPluginStart()
 	LoadTranslations("warnsystem.phrases");
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
-	
-	//BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
 	if(!DirExists("logs/WarnSystem"))
 		CreateDirectory("logs/WarnSystem", 511);
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");

@@ -55,29 +55,17 @@ stock void GetIPServer() {
 
 stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
 {
-    AdminId aAdmin = GetUserAdmin(iClient);
+	AdminFlag aFlag;
+	int iFlags;
 
-    if (aAdmin != INVALID_ADMIN_ID)
-    {
-        int iCount; int iFound; int iFlags = ReadFlagString(szFlagString);
-
-        for (int i = 0; i <= 20; i++)
-        {
-            if (iFlags & (1 << i))
-            {
-                iCount++;
-
-                if (GetAdminFlag(aAdmin, view_as<AdminFlag>(i)))
-                {
-                    iFound++;
-                }
-            }
-        }
-
-        if (iCount == iFound)
-        {
-            return true;
-        }
-    }
-    return false;
+	for (int i = 0; i < strlen(szFlagString); i++)
+	{
+		if(!FindFlagByChar(szFlagString[i], aFlag))	 continue;
+		iFlags |= FlagToBit(aFlag);
+		if (GetUserFlagBits(iClient) & iFlags)
+		{
+			return true;
+		}
+	}
+	return false;
 }

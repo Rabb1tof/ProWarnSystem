@@ -248,30 +248,11 @@ public void DisplayWarnReasons(int iClient)
 			iScore = 0; 
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "[%i] %s", iScore, sReason);
-		/*DataPack dWarnpack = new DataPack();
-		dWarnpack.WriteString(sReason);
-		dWarnpack.WriteString(sTime);
-		dWarnpack.WriteCell(iScore);
-		dWarnpack.Reset;*/
 		
 		hMenu.AddItem(sReason, sDisplay);
 	}
 	
 	hMenu.ExitBackButton = true;
-	
-	/*Handle hFilePath = OpenFile(g_sPathWarnReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/WarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	} 
-	
-	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -298,22 +279,6 @@ public void DisplayUnWarnReasons(int iClient)
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
-	
-
-	
-	/*Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/UnwarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	}
-	
-	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -340,20 +305,6 @@ public void DisplayResetWarnReasons(int iClient)
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
-	
-	/*Handle hFilePath = OpenFile(g_sPathResetReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/ResetWarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	}
-	
-	CloseHandle(hFilePath);*/
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -505,9 +456,6 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
 	
-	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
-	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;
 	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
@@ -542,7 +490,6 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
 			iID = StringToInt(szID);
 			
 			FormatEx(szdbQuery, sizeof(szdbQuery),  g_sSQL_GetInfoWarn, iID);
-			//LogMessage("Fetch warn: %s", szdbQuery);
 			g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
 			if(g_bLogQuery)
 				LogQuery("CheckPlayerWarnsMenu::SQL_GetInfoWarn: %s", szdbQuery);
