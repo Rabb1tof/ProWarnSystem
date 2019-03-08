@@ -227,7 +227,7 @@ public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iI
 public void DisplayWarnReasons(int iClient) 
 {
 	char sReason[129], sFlags[13], sDisplay[250];
-	int iFlags, iScore, iTime;
+	int iScore, iTime;
 	Menu hMenu = new Menu(MenuHandler_PreformWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	
@@ -236,10 +236,10 @@ public void DisplayWarnReasons(int iClient)
 		if(!hWarn.GetString("warn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hWarn.GetString("flags_warn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hWarn.GetString("flags_warn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		if(!hWarn.GetValue("time", iTime))
 			iTime = 0;
@@ -279,7 +279,7 @@ public void DisplayUnWarnReasons(int iClient)
 {
 	//WS_PrintToChat(iClient, "Test");
 	char sReason[129], sDisplay[250], sFlags[13];
-	int iFlags;
+	//int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformUnWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
@@ -290,10 +290,10 @@ public void DisplayUnWarnReasons(int iClient)
 		if(!hUnwarn.GetString("unwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
@@ -321,7 +321,7 @@ public void DisplayResetWarnReasons(int iClient)
 {
 	//WS_PrintToChatAll("Test2");
 	char sReason[129], sDisplay[250], sFlags[13];
-	int iFlags;
+	//int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformResetWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
@@ -332,10 +332,10 @@ public void DisplayResetWarnReasons(int iClient)
 		if(!hResetwarn.GetString("resetwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);

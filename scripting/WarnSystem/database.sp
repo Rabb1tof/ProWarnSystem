@@ -363,7 +363,7 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 	WarnSystem_OnClientLoaded(iClient);
 	
 	PrintToServer("Succefully load player data.");
-	PrintToServer("%N (%d, %d)", iClient, g_iWarnings[iClient], g_iScore[iClient]);
+	//PrintToServer("%N (%d, %d)", iClient, g_iWarnings[iClient], g_iScore[iClient]);
 }
 
 //--------------------------------------------------UPDATE SQL (DB)-------------------------------------------------
@@ -407,7 +407,7 @@ public void SQL_FailedUpdate(Database hDatabase, any data, int iNumQueries, cons
 
 public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])
 {
-	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iScore, sReason) == Plugin_Continue)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iTime, iScore, sReason) == Plugin_Continue)
 	{
 		if (iAdmin == iClient)
 		{
@@ -488,7 +488,10 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 				if(g_bLogQuery)
 					LogQuery("WarnPlayer::g_sSQL_UpdateData: %s", dbQuery);
 			}
-			PunishPlayerOnMaxWarns(iAdmin, iClient, sReason);
+			if(g_iScore[iClient] >= g_iMaxScore)
+				PunishPlayerOnMaxWarns(iAdmin, iClient, sReason, true);
+			else if(g_iWarnings[iClient] >= g_iMaxWarns)
+				PunishPlayerOnMaxWarns(iAdmin, iClient, sReason, false);
 		} else 
 			PunishPlayer(iAdmin, iClient, iScore, iTime, sReason);
 	}
