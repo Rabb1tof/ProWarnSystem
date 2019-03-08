@@ -227,7 +227,7 @@ public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iI
 public void DisplayWarnReasons(int iClient) 
 {
 	char sReason[129], sFlags[13], sDisplay[250];
-	int iFlags, iScore, iTime;
+	int iScore, iTime;
 	Menu hMenu = new Menu(MenuHandler_PreformWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
 	
@@ -236,10 +236,10 @@ public void DisplayWarnReasons(int iClient)
 		if(!hWarn.GetString("warn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hWarn.GetString("flags_warn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hWarn.GetString("flags_warn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		if(!hWarn.GetValue("time", iTime))
 			iTime = 0;
@@ -248,30 +248,11 @@ public void DisplayWarnReasons(int iClient)
 			iScore = 0; 
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "[%i] %s", iScore, sReason);
-		/*DataPack dWarnpack = new DataPack();
-		dWarnpack.WriteString(sReason);
-		dWarnpack.WriteString(sTime);
-		dWarnpack.WriteCell(iScore);
-		dWarnpack.Reset;*/
 		
 		hMenu.AddItem(sReason, sDisplay);
 	}
 	
 	hMenu.ExitBackButton = true;
-	
-	/*Handle hFilePath = OpenFile(g_sPathWarnReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/WarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	} 
-	
-	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -279,7 +260,7 @@ public void DisplayUnWarnReasons(int iClient)
 {
 	//WS_PrintToChat(iClient, "Test");
 	char sReason[129], sDisplay[250], sFlags[13];
-	int iFlags;
+	//int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformUnWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
@@ -290,30 +271,14 @@ public void DisplayUnWarnReasons(int iClient)
 		if(!hUnwarn.GetString("unwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hUnwarn.GetString("flags_unwarn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
-	
-
-	
-	/*Handle hFilePath = OpenFile(g_sPathUnwarnReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/UnwarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	}
-	
-	CloseHandle(hFilePath); */
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -321,7 +286,7 @@ public void DisplayResetWarnReasons(int iClient)
 {
 	//WS_PrintToChatAll("Test2");
 	char sReason[129], sDisplay[250], sFlags[13];
-	int iFlags;
+	//int iFlags;
 	
 	Menu hMenu = new Menu(MenuHandler_PreformResetWarn);
 	hMenu.SetTitle("%T", "WS_AdminMenuReasonTitle", iClient);
@@ -332,28 +297,14 @@ public void DisplayResetWarnReasons(int iClient)
 		if(!hResetwarn.GetString("resetwarn", sReason, sizeof(sReason)))
 			strcopy(sReason, sizeof(sReason), "Unknown reason");
 		
-		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)) || !(iFlags = ReadFlagString(sFlags)))
+		if(!hResetwarn.GetString("flags_resetwarn", sFlags, sizeof(sFlags)))
 			strcopy(sFlags, sizeof(sFlags), "Unknown flags");
 		
-		if (!(GetUserFlagBits(iClient) & iFlags)) continue;
+		if (!(CheckAdminFlagsByString(iClient, sFlags))) continue;
 		
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
-	
-	/*Handle hFilePath = OpenFile(g_sPathResetReasons, "rt");
-	if (!hFilePath)
-	{
-		LogWarnings("Could not find the config file (addons/sourcemod/configs/WarnSystem/ResetWarnReasons.cfg)");
-		return;
-	}
-	while (!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sReason, sizeof(sReason))) {
-		TrimString(sReason);
-		if (sReason[0])
-			AddMenuItem(hMenu, sReason, sReason);
-	}
-	
-	CloseHandle(hFilePath);*/
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -505,9 +456,6 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 	
 	//`ws_warn`.`warn_id`, `ws_player`.`account_id`, `ws_player`.`username`, `ws_warn`.`created_at`
 	
-	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "WS_Console", iClient, g_iWarnings[iClient]);
-	//WS_PrintToChat(iAdmin, " %t %t", "WS_Prefix", "See console for output");
-	
 	char szAdmin[129], szTimeFormat[65], szBuffer[80], szID[25];
 	int iDate, iID;
 	Menu hMenu = new Menu(CheckPlayerWarnsMenu);
@@ -542,7 +490,6 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
 			iID = StringToInt(szID);
 			
 			FormatEx(szdbQuery, sizeof(szdbQuery),  g_sSQL_GetInfoWarn, iID);
-			//LogMessage("Fetch warn: %s", szdbQuery);
 			g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
 			if(g_bLogQuery)
 				LogQuery("CheckPlayerWarnsMenu::SQL_GetInfoWarn: %s", szdbQuery);

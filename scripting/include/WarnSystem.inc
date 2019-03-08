@@ -118,7 +118,7 @@ forward void WarnSystem_OnClientLoaded(int iClient, int iWarnings, int g_iMaxWar
 * @param sReason		The reason why he warns
 * @noreturn	
 *********************************************************/
-forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[129]);
+forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129]);
 
 /*********************************************************
 * Calling then admin issues a unwarn
@@ -128,7 +128,7 @@ forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, char sReason[129])
 * @param sReason		The reason why he un6warns
 * @noreturn	
 *********************************************************/
-forward void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, char sReason[129]);
+forward void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, int iScore, char sReason[129]);
 
 /*********************************************************
 * Calling then admin issues a warn reset
