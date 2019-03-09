@@ -14,22 +14,24 @@
     
     "WS_MaxKick"
     {
-        "en"		"You have been kicked for reaching maximum warnings"
-        "ru"		"Вы кикнуты за макс. кол-во предупреждений"
-        "fr"		"Tu as ete kicke apres avoir ete suffisamment averti"
-        "de"		"Du wurdest gekickt wegen Ueberschreitung der Maximalgrenze von Warnungen"
-        "sv"		"Du har blivit utslängd för ha nått max antal varningar"
-        "nl"		"Je bent gekickt omdat je teveel waarschuwingen hebt"
+		"#format" 	"{1:s}"
+        "en"		"You have been kicked for reaching maximum {1}"
+        "ru"		"Вы кикнуты за макс. кол-во {1}"
+        "fr"		"Tu as ete kicke apres avoir ete suffisamment {1}"
+        "de"		"Du wurdest gekickt wegen Ueberschreitung der Maximalgrenze von {1}"
+        "sv"		"Du har blivit utslängd för ha nått max antal {1}"
+        "nl"		"Je bent gekickt omdat je teveel waarschuwingen {1}"
     }
     
     "WS_MaxBan"
     {
-        "en"		"You have been banned for reaching maximum warnings"
-        "en"		"Вы забанены за макс. кол-во предупреждений"
-        "fr"		"Tu as ete banni apres avoir ete suffisamment averti"
-        "de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von Warnungen"
-        "sv"		"Du har blivit bannlyst för ha nått max antal varningar"
-        "nl"		"Je bent verbannen voor teveel waarschuwingen hebben"
+		"#format" 	"{1:s}"
+        "en"		"You have been banned for reaching maximum {1}"
+        "en"		"Вы забанены за макс. кол-во {1}"
+        "fr"		"Tu as ete banni apres avoir ete suffisamment {1}"
+        "de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von {1}"
+        "sv"		"Du har blivit bannlyst för ha nått max antal {1}"
+        "nl"		"Je bent verbannen voor teveel waarschuwingen {1}"
     }
     
     "WS_Message"

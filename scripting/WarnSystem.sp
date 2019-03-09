@@ -3,11 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-<<<<<<< HEAD
-#define PLUGIN_VERSION      "1.4"
-=======
-#define PLUGIN_VERSION      "1.4-pro-dev"
->>>>>>> dev
+#define PLUGIN_VERSION      "1.5-pro"
 #define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -54,6 +50,7 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 #include "WarnSystem/commands.sp"
 #include "WarnSystem/configs.sp"
 #include "WarnSystem/menus.sp"
+#include "WarnSystem/func.sp"
 
 public Plugin myinfo =
 {
@@ -73,8 +70,6 @@ public void OnPluginStart()
 	LoadTranslations("warnsystem.phrases");
 	
 	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
-	
-	//BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem");
 	if(!DirExists("logs/WarnSystem"))
 		CreateDirectory("logs/WarnSystem", 511);
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
@@ -158,58 +153,29 @@ public void OnClientPutInServer(int iClient) {
 	LoadPlayerData(iClient);
 }
 
-//---------------------------------------------------SOME FEATURES-------------------------------------------------
-
-stock void PrintToAdmins(char[] sFormat, any ...)
-{
-	char sBuffer[255];
-	for (int i = 1; i<=MaxClients; ++i)
-		if (IsValidClient(i) && (GetUserFlagBits(i) & g_iPrintToAdminsOverride))
-		{	
-			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
-			CPrintToChat(i, "%s", sBuffer);
-		}
-}
-
-stock void WS_PrintToChat(int iClient, const char[] szFormat, any ...)
-{
-	char szBuffer[MAX_BUFFER_LENGTH];
-	VFormat(szBuffer, sizeof(szBuffer), szFormat, 3);
-	if(g_bIsFuckingGame)	CGOPrintToChat(iClient, "%s", szBuffer);
-	else 					CPrintToChat(iClient, "%s", szBuffer);
-}
-
-stock void WS_PrintToChatAll(const char[] szFormat, any ...)
-{
-	char szBuffer[MAX_BUFFER_LENGTH];
-	VFormat(szBuffer, sizeof(szBuffer), szFormat, 2);
-	if(g_bIsFuckingGame)	CGOPrintToChatAll("%s", szBuffer);
-	else 					CPrintToChatAll("%s", szBuffer);
-}
-
 //----------------------------------------------------PUNISHMENTS---------------------------------------------------
 
-public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129])
+public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129], bool bType)
 {
 	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
 		switch (g_iMaxPunishment)
 		{
 			case 1:
-				KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
+				KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
 			case 2:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
 				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
 			}
 			case 3:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
 				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected max punishment with custom module but module doesn't exists.  Client kicked.");
-					KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick");
+					KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
 				}
 			}
 		}
@@ -268,30 +234,4 @@ public void PunishmentSix(int iClient, int iAdmin, int iScore, int iTime, char[]
 		SetEntityMoveType(iClient, MOVETYPE_NONE);
 	BuildAgreement(iClient, iAdmin, iScore, iTime, szReason);
 	WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_Message");
-}
-
-void UTIL_CleanMemory() {
-	UTIL_CleanArrayList(g_aWarn);
-	UTIL_CleanArrayList(g_aUnwarn);
-	UTIL_CleanArrayList(g_aResetWarn);
-}
-
-void UTIL_CleanArrayList(ArrayList &hArr) {
-	if (!hArr) {
-		hArr = new ArrayList(ByteCountToCells(4));
-		return;
-	}
-
-	int iLength = hArr.Length;
-	for (int i = iLength-1; i >= 0; i--) {
-		CloseHandle(hArr.Get(i));
-		hArr.Erase(i);
-	}
-}
-
-stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }
-stock void GetPort() { g_iPort=FindConVar("hostport").IntValue; }
-stock void GetIPServer() { 
-	int iHostIP = FindConVar("hostip").IntValue;
-	FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
 }

@@ -18,7 +18,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientUnWarn = CreateGlobalForward("WarnSystem_OnClientUnWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns = CreateGlobalForward("WarnSystem_OnClientResetWarns", ET_Ignore, Param_Cell, Param_Cell, Param_String);
-	g_hGFwd_OnClientWarn_Pre = CreateGlobalForward("WarnSystem_OnClientWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_String, Param_Cell);
+	g_hGFwd_OnClientWarn_Pre = CreateGlobalForward("WarnSystem_OnClientWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
 	g_hGFwd_OnClientUnWarn_Pre = CreateGlobalForward("WarnSystem_OnClientUnWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns_Pre = CreateGlobalForward("WarnSystem_OnClientResetWarnsPre", ET_Hook, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_WarnPunishment = CreateGlobalForward("WarnSystem_WarnPunishment", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_String);
@@ -136,14 +136,15 @@ void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[129])
 	Call_Finish();
 }
 
-Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, int iScore, char sReason[129])
+Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, int iTime, int iScore, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientWarn_Pre);
 	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
-	Call_PushString(sReason);
+	Call_PushCell(iTime);
 	Call_PushCell(iScore);
+	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;
 }
