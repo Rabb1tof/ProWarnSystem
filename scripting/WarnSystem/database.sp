@@ -273,11 +273,7 @@ public void SQL_UploadData(Database hDatabase, DBResultSet hDatabaseResults, con
 		CheckExpiredWarns();
 		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		if(g_bLogQuery)
-<<<<<<< HEAD
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
-=======
 			LogQuery("SQL_UploadData::SQL_UploadData: %s", dbQuery);
->>>>>>> dev
 		g_hDatabase.Query(SQL_LoadPlayerData, dbQuery, iClient);
 	}
 }

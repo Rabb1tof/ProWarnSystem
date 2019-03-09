@@ -55,17 +55,17 @@ stock void GetIPServer() {
 
 stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
 {
-	AdminFlag aFlag;
-	int iFlags;
+    AdminFlag aFlag;
+    int iFlags;
 
-	for (int i = 0; i < strlen(szFlagString); i++)
-	{
-		if(!FindFlagByChar(szFlagString[i], aFlag))	 continue;
-		iFlags |= FlagToBit(aFlag);
-		if (GetUserFlagBits(iClient) & iFlags)
-		{
-			return true;
-		}
-	}
-	return false;
+    for (int i = 0; i < strlen(szFlagString); i++)
+    {
+        if(!FindFlagByChar(szFlagString[i], aFlag))     continue;
+        iFlags |= FlagToBit(aFlag);
+        if (GetUserFlagBits(iClient) & iFlags)
+        {
+            return true;
+        }
+    }
+    return false;
 }
