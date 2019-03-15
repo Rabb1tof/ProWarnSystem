@@ -1,6 +1,6 @@
 /scripting/*
 !/scripting/WarnSystem/
-!/scripting/include/
+!/scripting/include/WarnSystem.inc
 !/scripting/WarnSystem.sp
 !/scripting/NativeExample.sp
 !/scripting/WS_Sourcebans.sp
