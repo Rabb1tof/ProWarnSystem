@@ -366,7 +366,7 @@ public void SQL_FailedUpdate(Database hDatabase, any data, int iNumQueries, cons
 
 public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])
 {
-	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iScore, iTime, sReason) == Plugin_Continue)
+	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iTime, iScore, sReason) == Plugin_Continue)
 	{
 		if (iAdmin == iClient)
 		{
