@@ -71,10 +71,10 @@ native Database WarnSystem_GetDatabase();
 * Returns count of player warns
 *
 * @param 	iClient
-* @param   iType
+* @param    iType // 1 - warns, 2 - score
 * @return 	Count of client warnings
 *********************************************************/
-native int WarnSystem_GetPlayerWarns(int iClient, int iType);
+native int WarnSystem_GetPlayerInfo(int iClient, int iType);
 
 /*********************************************************
 * Returns count of max score
