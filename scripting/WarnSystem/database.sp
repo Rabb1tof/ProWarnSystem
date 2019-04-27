@@ -135,6 +135,7 @@ public void InitializeDatabase()
 			hTxn.AddQuery(g_sSQL_CreateTablePlayers_MySQL); // 0
 			hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
 			hTxn.AddQuery(g_sSQL_CreateTableWarns_MySQL); // 2
+			g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
 		} else
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
 	
@@ -240,24 +241,26 @@ public void SQL_CheckData(Database hDatabase, DBResultSet hDatabaseResults, cons
 		LogWarnings("[WarnSystem] SQL_CheckData - error while working with data (%s)", sError);
 		return;
 	}
-	
-	char dbQuery[513], szName[64], sEscapedClientName[129];
-	GetClientName(iClient, szName, sizeof(szName));
-	SQL_EscapeString(g_hDatabase, szName, sEscapedClientName, sizeof(sEscapedClientName));
-	if (hDatabaseResults.RowCount == 0) {
-		g_iWarnings[iClient] = g_iScore[iClient] = 0;
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient], g_iScore[iClient]);
-		if(g_bLogQuery)
-			LogQuery("SQL_CheckData::SQL_CheckData: %s", dbQuery);
-		g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
-		return;
-	}
-	else {
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, g_iAccountID[iClient], g_iAccountID[iClient], sEscapedClientName, g_iAccountID[iClient]);
-		if(g_bLogQuery)
-			LogQuery("SQL_CheckData::SQL_CheckData: %s", dbQuery);
-		g_hDatabase.Query(SQL_UpdateData, dbQuery, iClient);
-		return;
+	if(IsValidClient(iClient))
+	{
+		char dbQuery[513], szName[64], sEscapedClientName[129];
+		GetClientName(iClient, szName, sizeof(szName));
+		SQL_EscapeString(g_hDatabase, szName, sEscapedClientName, sizeof(sEscapedClientName));
+		if (hDatabaseResults.RowCount == 0) {
+			g_iWarnings[iClient] = g_iScore[iClient] = 0;
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UploadData, g_iAccountID[iClient], sEscapedClientName, g_iWarnings[iClient], g_iScore[iClient]);
+			if(g_bLogQuery)
+				LogQuery("SQL_CheckData::SQL_CheckData: %s", dbQuery);
+			g_hDatabase.Query(SQL_UploadData, dbQuery, iClient);
+			return;
+		}
+		else {
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UpdateData, g_iAccountID[iClient], g_iAccountID[iClient], sEscapedClientName, g_iAccountID[iClient]);
+			if(g_bLogQuery)
+				LogQuery("SQL_CheckData::SQL_CheckData: %s", dbQuery);
+			g_hDatabase.Query(SQL_UpdateData, dbQuery, iClient);
+			return;
+		}
 	}
 }
 
@@ -417,6 +420,7 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 				EmitSoundToClient(iClient, sBuffer);
 			} else
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
+	
 	
 		if (g_bPrintToChat) 
 			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);

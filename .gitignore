@@ -1,4 +1,5 @@
 /scripting/*
+/.vscode
 !/scripting/WarnSystem/
 !/scripting/include/WarnSystem.inc
 !/scripting/WarnSystem.sp

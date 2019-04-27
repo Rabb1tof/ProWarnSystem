@@ -27,7 +27,7 @@
     {
 		"#format" 	"{1:s}"
         "en"		"You have been banned for reaching maximum {1}"
-        "en"		"Вы забанены за макс. кол-во {1}"
+        "ru"		"Вы забанены за макс. кол-во {1}"
         "fr"		"Tu as ete banni apres avoir ete suffisamment {1}"
         "de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von {1}"
         "sv"		"Du har blivit bannlyst för ha nått max antal {1}"
@@ -48,7 +48,7 @@
     {
         "#format"	"{1:s}"
         "en"		"You have been kicked for receiving a warning (Reason:{1})"
-        "en"		"Вы кикнуты за предупреждение (Причина:{1})"
+        "ru"		"Вы кикнуты за предупреждение (Причина:{1})"
         "fr"        "Tu as ete kicke en guise d'avertissement (Motif: {1})"
         "de"		"Du wurdest gekickt, weil Du eine Warnung erhalten hast"
         "sv"		"Du har blivit utslängd för att ha mottagit en varning (Anledning: {1})"
@@ -295,7 +295,7 @@
     "WS_AdminMenuReasonTitle"
     {
         "en"		"Select reason"
-        "en"		"Выберите причину"
+        "ru"		"Выберите причину"
         "fr"        "Choisir un motif"
         "de"		"Grund wählen"
         "sv"		"Välj anledning"
@@ -367,7 +367,7 @@
     "WS_CheckWarnArguments"
     {
         "en"		"Usage: sm_checkwarn <#userid|name>"
-        "en"		"Использование: sm_checkwarn <#userid|ник>"
+        "ru"		"Использование: sm_checkwarn <#userid|ник>"
         "fr"        "Utilisation: sm_checkwarn <#userid|nom>"
         "de" 		"Benutzung: sm_checkwarn <#userid|name>"
         "sv"		"Användning: sm_checkwarn <#userid|namn>"
