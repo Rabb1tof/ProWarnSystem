@@ -35,39 +35,39 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 
 public int Native_WarnPlayer(Handle hPlugin, int iNumParams)
 {
-	int iAdmin = GetNativeCell(1);
-	int iClient = GetNativeCell(2);
+	int iClient = GetNativeCell(1);
+	int iTarget = GetNativeCell(2);
 	char sReason[129];
 	int iScore = GetNativeCell(3);
 	int iTime = GetNativeCell(4);
 	GetNativeString(5, sReason, sizeof(sReason));
-	if (IsValidClient(iClient) && -1<iAdmin<=MaxClients)
-		WarnPlayer(iAdmin, iClient, iScore, iTime, sReason);
+	if (IsValidClient(iTarget) && -1<iClient<=MaxClients)
+		WarnPlayer(iClient, iTarget, iScore, iTime, sReason);
 	else
 		ThrowNativeError(1, "Native_WarnPlayer: Client or admin index is invalid.");
 }
 
 public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
 {
-	int iAdmin = GetNativeCell(1);
-	int iClient = GetNativeCell(2);
+	int iClient = GetNativeCell(1);
+	int iTarget = GetNativeCell(2);
 	//int iScore = GetNativeCell(3);
 	char sReason[129];
 	GetNativeString(4, sReason, sizeof(sReason));
-	if (IsValidClient(iClient) && -1<iAdmin<=MaxClients)
-		UnWarnPlayer(iAdmin, iClient, sReason);
+	if (IsValidClient(iTarget) && -1<iClient<=MaxClients)
+		UnWarnPlayer(iClient, iTarget, sReason);
 	else
 		ThrowNativeError(2, "Native_UnWarnPlayer: Client or admin index is invalid.");
 }
 
 public int Native_ResetWarnPlayer(Handle hPlugin, int iNumParams)
 {
-	int iAdmin = GetNativeCell(1);
-	int iClient = GetNativeCell(2);
+	int iClient = GetNativeCell(1);
+	int iTarget = GetNativeCell(2);
 	char sReason[129];
 	GetNativeString(3, sReason, sizeof(sReason));
-	if (IsValidClient(iClient) && -1<iAdmin<=MaxClients)
-		ResetPlayerWarns(iAdmin, iClient, sReason);
+	if (IsValidClient(iTarget) && -1<iClient<=MaxClients)
+		ResetPlayerWarns(iClient, iTarget, sReason);
 	else
 		ThrowNativeError(3, "Native_ResetWarnPlayer: Client or admin index is invalid.");
 }
@@ -76,11 +76,11 @@ public int Native_GetDatabase(Handle hPlugin, int iNumParams) {return view_as<in
 
 public int Native_GetPlayerInfo(Handle hPlugin, int iNumParams)
 {
-	int iClient = GetNativeCell(1);
+	int iTarget = GetNativeCell(1);
 	int iType = GetNativeCell(2);
 	switch(iType) {
-		case 1:	return g_iWarnings[iClient];
-		case 2: return g_iScore[iClient];
+		case 1:	return g_iWarnings[iTarget];
+		case 2: return g_iScore[iTarget];
 	}
 	return 0;
 }
@@ -95,21 +95,21 @@ public int Native_PrintToAdmins(Handle hPlugin, int iNumParams)
 	PrintToAdmins("%s", sMessage);
 }
 
-void WarnSystem_OnClientLoaded(int iClient)
+void WarnSystem_OnClientLoaded(int iTarget)
 {
 	Call_StartForward(g_hGFwd_OnClientLoaded);
-	Call_PushCell(iClient);
-	Call_PushCell(g_iWarnings[iClient]);
-	Call_PushCell(g_iScore[iClient]);
+	Call_PushCell(iTarget);
+	Call_PushCell(g_iWarnings[iTarget]);
+	Call_PushCell(g_iScore[iTarget]);
 	Call_PushCell(g_iMaxWarns);
 	Call_Finish();
 }
 
-void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])
+void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientWarn);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushCell(iScore);
 	Call_PushCell(iTime);
 	Call_PushString(sReason);
@@ -117,31 +117,31 @@ void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, cha
 	Call_Finish();
 }
 
-void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, int iScore, char sReason[129])
+void WarnSystem_OnClientUnWarn(int iClient, int iTarget, int iScore, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientUnWarn);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushCell(iScore);
 	Call_PushString(sReason);
 	Call_Finish();
 }
 
-void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[129])
+void WarnSystem_OnClientResetWarns(int iClient, int iTarget, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientResetWarns);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushString(sReason);
 	Call_Finish();
 }
 
-Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, int iTime, int iScore, char sReason[129])
+Action WarnSystem_OnClientWarnPre(int iClient, int iTarget, int iTime, int iScore, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientWarn_Pre);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushCell(iTime);
 	Call_PushCell(iScore);
 	Call_PushString(sReason);
@@ -149,46 +149,46 @@ Action WarnSystem_OnClientWarnPre(int iAdmin, int iClient, int iTime, int iScore
 	return act;
 }
 
-Action WarnSystem_OnClientUnWarnPre(int iAdmin, int iClient, char sReason[129])
+Action WarnSystem_OnClientUnWarnPre(int iClient, int iTarget, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientUnWarn_Pre);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;
 }
 
-Action WarnSystem_OnClientResetWarnsPre(int iAdmin, int iClient, char sReason[129])
+Action WarnSystem_OnClientResetWarnsPre(int iClient, int iTarget, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientResetWarns_Pre);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;
 }
 
-Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght,  char sReason[129])
+Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght,  char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_WarnPunishment);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushCell(iBanLenght);
 	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;
 }
 
-Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
+Action WarnSystem_WarnMaxPunishment(int iClient, int iTarget, int iBanLenght, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_WarnMaxPunishment);
-	Call_PushCell(iAdmin);
 	Call_PushCell(iClient);
+	Call_PushCell(iTarget);
 	Call_PushCell(iBanLenght);
 	Call_PushString(sReason);
 	Call_Finish(act);

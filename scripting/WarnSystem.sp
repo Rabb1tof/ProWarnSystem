@@ -13,6 +13,7 @@
 //#include <colors>
 #include <csgo_colors>
 #include <morecolors>
+#include <SteamWorks>
 #include <sdktools_sound>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
@@ -20,7 +21,7 @@
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
-#include <SteamWorks>
+#tryinclude <vip_core>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
 
