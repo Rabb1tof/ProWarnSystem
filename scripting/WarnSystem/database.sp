@@ -136,6 +136,7 @@ public void InitializeDatabase()
 			hTxn.AddQuery(g_sSQL_CreateTableServers, 5); // 1
 			hTxn.AddQuery(g_sSQL_CreateTableWarns_MySQL); // 2
 			g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 1);
+			PrintToServer("Creating DB started...");
 		} else
 			SetFailState("[WarnSystem] InitializeDatabase - type database is invalid");
 	
