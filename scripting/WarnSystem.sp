@@ -3,8 +3,8 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.5.2.1"
-#define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
+#define PLUGIN_VERSION      "1.5.2.2"
+#define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
@@ -15,6 +15,7 @@
 #include <morecolors>
 #include <SteamWorks>
 #include <sdktools_sound>
+#include <sourcemod>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
 #include <dbi>
@@ -24,6 +25,8 @@
 #tryinclude <vip_core>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
+
+#pragma newdecls required
 
 //----------------------------------------------------------------------------
 
@@ -40,11 +43,6 @@ int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1]
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
 #include "WarnSystem/stats.sp"
-
-#pragma newdecls required
-
-
-
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
@@ -70,7 +68,7 @@ public void OnPluginStart()
 	LoadTranslations("core.phrases");
 	LoadTranslations("warnsystem.phrases");
 	
-	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
+	switch (GetEngineVersion()) { case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true; }
 	if(!DirExists("addons/sourcemod/logs/WarnSystem"))
 		CreateDirectory("addons/sourcemod/logs/WarnSystem", 511);
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
