@@ -224,6 +224,16 @@ public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iI
 	}
 }
 
+void CustomReasonETC(Menu hMenu, int iClient)
+{
+	char szBuffer[64];
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_Custom_ReasonWarn");
+	hMenu.AddItem("custom_reason", szBuffer);
+	//g_iTargetCustom = 
+	g_bCustom[iClient] = true;
+	return;
+}
+
 public void DisplayWarnReasons(int iClient) 
 {
 	char sReason[129], sFlags[13], sDisplay[250];
@@ -251,6 +261,9 @@ public void DisplayWarnReasons(int iClient)
 		
 		hMenu.AddItem(sReason, sDisplay);
 	}
+
+	if(g_bUseCustom)
+		CustomReasonETC(hMenu, iClient);
 	
 	hMenu.ExitBackButton = true;
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
@@ -279,6 +292,10 @@ public void DisplayUnWarnReasons(int iClient)
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
+
+	if(g_bUseCustom)
+		CustomReasonETC(hMenu, iClient);
+
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -305,6 +322,10 @@ public void DisplayResetWarnReasons(int iClient)
 		FormatEx(sDisplay, sizeof(sDisplay), "%s", sReason);
 		hMenu.AddItem(sReason, sDisplay);
 	}
+
+	if(g_bUseCustom)
+		CustomReasonETC(hMenu, iClient);
+	
 	DisplayMenu(hMenu, iClient, MENU_TIME_FOREVER);
 }
 
@@ -324,6 +345,8 @@ public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, in
 					break;
 				}
 			}
+			if(StrEqual(szInfo, "custom_reason"))
+				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -349,6 +372,8 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 					break;
 				}
 			}
+			if(StrEqual(szInfo, "custom_reason"))
+				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -374,6 +399,8 @@ public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param
 					break;
 				}
 			}
+			if(StrEqual(szInfo, "custom_reason"))
+				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
