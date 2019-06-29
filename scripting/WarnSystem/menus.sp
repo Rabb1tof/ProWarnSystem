@@ -227,7 +227,7 @@ public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iI
 void CustomReasonETC(Menu hMenu, int iClient)
 {
 	char szBuffer[64];
-	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_Custom_ReasonWarn");
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_Custom_ReasonWarn", 0);
 	hMenu.AddItem("custom_reason", szBuffer);
 	//g_iTargetCustom = 
 	g_bCustom[iClient] = true;

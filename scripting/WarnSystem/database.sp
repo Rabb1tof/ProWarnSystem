@@ -319,6 +319,8 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 		
 		if (g_bPrintToAdmins && !g_bIsLateLoad)
 			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_PlayerWarns", iClient, g_iWarnings[iClient], g_iScore[iClient]);
+
+		PrintToChatAll("Debug: %b", g_bIsFuckingGame);
 	} else {
 		g_iWarnings[iClient] = 0;
 		g_iScore[iClient] = 0;

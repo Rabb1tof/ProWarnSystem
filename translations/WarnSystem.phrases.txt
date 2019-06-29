@@ -89,6 +89,12 @@
         "sv"		"{olive}{1} {default}utfärdade en varning på {2} med anledningen: {3}"
         "nl"		"{olive}{1} {default}heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
     }
+
+    "WS_Custom_ReasonWarn"
+    {
+        "ru"        "Введите вашу кастомную причину в чат"
+        "en"        "Write your custom reason in chat"
+    }
     
     "WS_WarnPlayerPersonal"
     {
