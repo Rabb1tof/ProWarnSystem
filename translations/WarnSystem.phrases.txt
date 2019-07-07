@@ -92,8 +92,14 @@
 
     "WS_Custom_ReasonWarn"
     {
-        "ru"        "Введите вашу кастомную причину в чат"
-        "en"        "Write your custom reason in chat"
+        "ru"        "Своя причина"
+        "en"        "Own reason"
+    }
+
+    "WS_CustomWarn"
+    {
+        "ru"        "Введите свою причину в чат!"
+        "en"        "Write your custom reason in chat!"
     }
     
     "WS_WarnPlayerPersonal"
