@@ -101,6 +101,12 @@
         "ru"        "Введите свою причину в чат!"
         "en"        "Write your custom reason in chat!"
     }
+
+    "WS_Reason_Aborted"
+    {
+        "ru"        "Вы отменили ввод!"
+        "en"        "Write reason aborted"
+    }
     
     "WS_WarnPlayerPersonal"
     {

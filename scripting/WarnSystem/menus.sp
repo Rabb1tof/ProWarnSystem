@@ -70,7 +70,7 @@ stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
 	for (int i = 1; i <= MaxClients; ++i) {
-		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && /*iAdmin != i &&*/ CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			switch(g_iWarnType) {
@@ -227,11 +227,9 @@ public int Handler_UpdateMenu(Menu hMenu, MenuAction action, int iClient, int iI
 void CustomReasonETC(Menu hMenu, int iClient)
 {
 	char szBuffer[64];
-	FormatEx(szBuffer, sizeof(szBuffer), "%t", "WS_Custom_ReasonWarn");
+	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_Custom_ReasonWarn", iClient);
 	hMenu.AddItem("custom_reason", szBuffer);
 	//g_iTargetCustom = 
-	g_bCustom[iClient] = true;
-	return;
 }
 
 public void DisplayWarnReasons(int iClient) 
@@ -346,7 +344,11 @@ public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, in
 				}
 			}
 			if(StrEqual(szInfo, "custom_reason"))
+			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
+				g_iCustom[param1] = 1;
+				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -373,7 +375,11 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 				}
 			}
 			if(StrEqual(szInfo, "custom_reason"))
+			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
+				g_iCustom[param1] = 2;
+				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)
@@ -400,7 +406,11 @@ public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param
 				}
 			}
 			if(StrEqual(szInfo, "custom_reason"))
+			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
+				g_iCustom[param1] = 3;
+				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+			}
 		}
 		case MenuAction_Cancel:
 			if (param2 == MenuCancel_ExitBack && g_hAdminMenu)

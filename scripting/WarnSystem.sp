@@ -32,12 +32,12 @@
 
 char g_sPathAgreePanel[PLATFORM_MAX_PATH], g_sLogPath[PLATFORM_MAX_PATH], g_szQueryPath[PLATFORM_MAX_PATH], g_sAddress[64];
 
-bool g_bIsFuckingGame, g_bCustom[MAXPLAYERS+1];
+bool g_bIsFuckingGame;
 ArrayList g_aWarn, g_aUnwarn, g_aResetWarn;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1], /*(g_iPrintToAdminsOverride,*/ g_iUserID[MAXPLAYERS+1], g_iPort, g_iScore[MAXPLAYERS+1];
+int g_iWarnings[MAXPLAYERS+1], /*(g_iPrintToAdminsOverride,*/ g_iUserID[MAXPLAYERS+1], g_iPort, g_iScore[MAXPLAYERS+1], g_iCustom[MAXPLAYERS+1];
 
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
@@ -76,6 +76,10 @@ public void OnPluginStart()
 	}
 	if(!DirExists("addons/sourcemod/logs/WarnSystem"))
 		CreateDirectory("addons/sourcemod/logs/WarnSystem", 511);
+	if(!FileExists("logs/WarnSystem/WarnSystem.log"))
+		OpenFile("logs/WarnSystem/WarnSystem.log", "w");
+	if(!FileExists("logs/WarnSystem/WarnSystem_Query.log"))
+		OpenFile("logs/WarnSystem/WarnSystem_Query.log", "w");
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
 	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
 	
@@ -120,28 +124,27 @@ public void OnLibraryRemoved(const char[] sName)
 
 public Action OnClientSayCommand(int iClient, const char[] szCommand, const char[] szArgs)
 {
-	if(g_bCustom[iClient])
+	if(g_iCustom[iClient] == 0)		return Plugin_Handled;
+
+	char szReason[129];
+	strcopy(szReason, sizeof(szReason), szArgs);
+	//GetCmdArgString(szReason, sizeof(szReason));
+	StripQuotes(szReason);
+	if (StrEqual(szReason[0], "!stop") || StrEqual(szReason[0], "!cancel") || StrEqual(szReason[0], "!s") || StrEqual(szReason[0], "!c"))
 	{
-		char szReason[129];
-		strcopy(szReason, sizeof(szReason), szCommand);
-		//GetCmdArgString(szReason, sizeof(szReason));
-		StripQuotes(szReason);
-
-		g_bCustom[iClient] = false;
-
-		if (StrEqual(szReason[0], "!stop") || StrEqual(szReason[0], "!cancel") || StrEqual(szReason[0], "!s") || StrEqual(szReason[0], "!c"))
-		{
-			WS_PrintToChat(iClient, "%t", "WS_Reason_Aborted");
-			return Plugin_Handled;
-		}
-
-		// issue a warning
-		WarnPlayer(iClient, g_iTarget[iClient], g_iScoreLength, g_iWarnLength, szReason);
-
-		// block the reason to be sent in chat
+		WS_PrintToChat(iClient, "%t", "WS_Reason_Aborted");
 		return Plugin_Handled;
 	}
-	return Plugin_Continue;
+
+	switch(g_iCustom[iClient])		
+	{
+		case 1: 	WarnPlayer(iClient, g_iTarget[iClient], g_iScoreLength, g_iWarnLength, szReason); // issue a warning	
+		case 2:		UnWarnPlayer(iClient, g_iTarget[iClient], szReason);
+		case 3:		ResetPlayerWarns(iClient, g_iTarget[iClient], szReason);
+		//return Plugin_Handled; // block the reason to be sent in chat
+	}
+	g_iCustom[iClient] = 0;
+	return Plugin_Handled;
 }
 
 public void OnMapStart()
