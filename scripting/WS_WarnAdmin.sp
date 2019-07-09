@@ -28,6 +28,10 @@ public void OnPluginStart()
 	#if defined _sourcebans_included || defined _sourcebanspp_included
 	SQL_TConnect(SBGetDatabase, "sourcebans");
 	#endif
+
+	#if defined _materialadmin_included
+	g_hDatabase = MAGetDatabase();
+	#endif
 }
 
 #if defined _sourcebans_included || defined _sourcebanspp_included
@@ -50,17 +54,27 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
 		iMaxScore = WarnSystem_GetMaxScore();
 	int	iScoreClient = WarnSystem_GetPlayerInfo(iClient, 2), 
 		iWarns = WarnSystem_GetPlayerInfo(iClient, 1);
-	#if defined _materialadmin_included
+	/*#if defined _materialadmin_included
 	g_hDatabase = MAGetDatabase();
-	#endif
+	#endif*/
 	if(g_hDatabase != INVALID_HANDLE && GetUserFlagBits(iClient))
 	{
 		char szBuffer[525];
 		int iAccountIDA = GetSteamAccountID(iAdmin), iAccountIDC = GetSteamAccountID(iClient);
-		if(iMaxScore <= iScoreClient || iMaxWarn <= iWarns)
+		if(iMaxScore < iScoreClient || iMaxWarn < iWarns)
 		{
 			FormatEx(szBuffer, sizeof(szBuffer), "UPDATE `sb_admins` SET 'expired' = UNIX_TIMESTAMP() WHERE `authid` IN('STEAM_0:%i:%i', STEAM_1:%i:%i, '%i+76561197960265728')", iAccountIDC & 1, iAccountIDC / 2, 
 				iAccountIDC & 1, iAccountIDC / 2, iAccountIDC);
+			char szBuffer[64];
+			AdminId aAdmin[2]; 
+			FormatEx(szBuffer, sizeof(szBuffer), "STEAM_1:%i:%i")
+			aAdmin[0] = FindAdminByIdentity("steam", szBuffer);
+			FormatEx(szBuffer, sizeof(szBuffer), "STEAM_0:%i:%i")
+			aAdmin[1] = FindAdminByIdentity("steam", szBuffer);
+			if(aAdmin[0] != INVALID_ADMIN_ID) 
+				RemoveAdmin(aAdmin[0])
+			else if(aAdmin[1] != INVALID_ADMIN_ID)
+				RemoveAdmin(aAdmin[1])
 		}
 		else
 		{

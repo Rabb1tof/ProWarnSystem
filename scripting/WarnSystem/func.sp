@@ -53,6 +53,25 @@ stock void GetIPServer() {
 	FormatEx(g_sAddress, sizeof(g_sAddress), "%d.%d.%d.%d", (iHostIP >> 24) & 0x000000FF, (iHostIP >> 16) & 0x000000FF, (iHostIP >>  8) & 0x000000FF, iHostIP & 0x000000FF);
 }
 
+void UTIL_FormatTime(int iTime, char[] szBuffer, int iMaxLength) {
+  int days = iTime / (60 * 60 * 24);
+  int hours = (iTime - (days * (60 * 60 * 24))) / (60 * 60);
+  int minutes = (iTime - (days * (60 * 60 * 24)) - (hours * (60 * 60))) / 60;
+  int len;
+
+  if (days) {
+    len += FormatEx(szBuffer[len], iMaxLength - len, "%d %t", days, "ws_days");
+  }
+
+  if (hours) {
+    len += FormatEx(szBuffer[len], iMaxLength - len, "%s%d %t", days ? " " : "", hours, "ws_hours");
+  }
+
+  if (minutes) {
+    len += FormatEx(szBuffer[len], iMaxLength - len, "%s%d %t", (days || hours) ? " " : "", minutes, "ws_minutes");
+  }
+}
+
 stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
 {
     AdminFlag aFlag;

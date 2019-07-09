@@ -391,4 +391,22 @@
         "sv"		"Användning: sm_checkwarn <#userid|namn>"
         "nl"		"Gebruik: sm_checkwarn <#userid|naam>"
     }
+
+    "ws_days"
+    {
+        "ru"        "дней"
+        "en"        "days"
+    }
+
+    "ws_hours"
+    {
+        "ru"        "часов"
+        "en"        "hours"
+    }
+
+    "ws_minutes"
+    {
+        "ru"        "минут"
+        "en"        "minutes"
+    }
 }

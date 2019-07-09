@@ -15,7 +15,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	CreateNative("WarnSystem_GetMaxScore", Native_MaxScore);
 	
 	g_hGFwd_OnClientLoaded = CreateGlobalForward("WarnSystem_OnClientLoaded", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
-	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
+	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
 	g_hGFwd_OnClientUnWarn = CreateGlobalForward("WarnSystem_OnClientUnWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns = CreateGlobalForward("WarnSystem_OnClientResetWarns", ET_Ignore, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientWarn_Pre = CreateGlobalForward("WarnSystem_OnClientWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
@@ -105,7 +105,7 @@ void WarnSystem_OnClientLoaded(int iTarget)
 	Call_Finish();
 }
 
-void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, char sReason[129])
+void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, char sReason[129], bool bIsAdmin)
 {
 	Call_StartForward(g_hGFwd_OnClientWarn);
 	Call_PushCell(iClient);
@@ -113,6 +113,7 @@ void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, ch
 	Call_PushCell(iScore);
 	Call_PushCell(iTime);
 	Call_PushString(sReason);
+	Call_PushCell(bIsAdmin);
 	
 	Call_Finish();
 }

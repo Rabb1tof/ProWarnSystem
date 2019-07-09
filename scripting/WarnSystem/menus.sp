@@ -347,7 +347,7 @@ public int MenuHandler_PreformWarn(Menu hMenu, MenuAction action, int param1, in
 			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 				g_iCustom[param1] = 1;
-				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+				//PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
 			}
 		}
 		case MenuAction_Cancel:
@@ -378,7 +378,7 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 				g_iCustom[param1] = 2;
-				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+				//PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
 			}
 		}
 		case MenuAction_Cancel:
@@ -409,7 +409,7 @@ public int MenuHandler_PreformResetWarn(Menu hMenu, MenuAction action, int param
 			{
 				WS_PrintToChat(param1, "%t", "WS_CustomWarn");
 				g_iCustom[param1] = 3;
-				PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
+				//PrintToChat(param1, "Debug: %d", g_iCustom[param1]);
 			}
 		}
 		case MenuAction_Cancel:
@@ -439,7 +439,9 @@ public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[
 	
 	IntToString(iScore, szScore, sizeof(szScore));
 	GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
-	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%X", iTime);
+	//UTIL_FormatTime(szTimeFormat, sizeof(szTimeFormat), "%X", iTime);
+	UTIL_FormatTime(iTime, szTimeFormat, sizeof(szTimeFormat));
+	PrintToChatAll("Time: %d\nTime: %s", iTime, szTimeFormat);
 	
 	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
 		
@@ -507,7 +509,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 		iDate = hDatabaseResults.FetchInt(3);
 		
 		
-		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%d-%m-%Y %X", iDate);
+		UTIL_FormatTime(iDate, szTimeFormat, sizeof(szTimeFormat));
 		FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
 		hMenu.AddItem(szID, szBuffer);
 	}
@@ -567,10 +569,10 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 	iDate    = hDatabaseResults.FetchInt(7);
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoScore", iAdmin, iScore);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
-	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iExpired);
+	UTIL_FormatTime(iExpired, szTimeFormat, sizeof(szTimeFormat));
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, szTimeFormat);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
-	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
+	UTIL_FormatTime(iDate, szTimeFormat, sizeof(szTimeFormat));
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoTime", iAdmin, szTimeFormat);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
 	

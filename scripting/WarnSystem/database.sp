@@ -22,6 +22,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
   `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
   `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
   `deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
+  `isadmin` TINYINT(1) unsigned NOT NULL COMMENT 'Является ли предупрежденный админом (1 - да)',\
   PRIMARY KEY (`warn_id`),\
   KEY `FK_ws_warn_ws_server` (`server_id`),\
   KEY `FK_ws_warn_ws_admin` (`admin_id`),\
@@ -41,6 +42,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	`created_at` INTEGER NOT NULL, \
 	`expires_at` INTEGER NOT NULL, \
 	`deleted` TINYINT NOT NULL DEFAULT '0', \
+	`isadmin` TINYINT NOT NULL DEFAULT '0', \
 	CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE, \
 	CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE)",
 	
@@ -53,7 +55,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Перечень серверов';",
 	g_sSQL_GetServerID[] = "SELECT `server_id` FROM `ws_server` WHERE `address` = '%s' AND `port` = '%i';",
 	g_sSQL_SetServerID[] = "INSERT IGNORE INTO `ws_server` (`address`, `port`) VALUES ('%s', '%i');",
-	g_sSQL_WarnPlayerW[] = "INSERT INTO `ws_warn` (`server_id`, `client_id`, `admin_id`, `reason`, `score`, `created_at`, `expires_at`) VALUES ('%i', '%i', '%i', '%s', '%i', '%i', '%i');",
+	g_sSQL_WarnPlayerW[] = "INSERT INTO `ws_warn` (`server_id`, `client_id`, `admin_id`, `reason`, `score`, `created_at`, `expires_at`, `isadmin`) VALUES ('%i', '%i', '%i', '%s', '%i', '%i', '%i', '%i');",
 	g_sSQL_WarnPlayerP[] = "UPDATE `ws_player` SET `username` = '%s', `warns` = '%i', `score` = '%i' WHERE `account_id` = '%i';",
 	g_sSQL_DeleteWarns[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `client_id` = '%i';",
 	g_sSQL_DeleteExpired[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `expires_at` <= '%i' AND `expires_at` <> '0';",
@@ -96,9 +98,11 @@ INNER JOIN `ws_player` AS `admin` \
 INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id` \
 WHERE `ws_warn`.`warn_id` = '%i';",
-	g_sSQL_UpdateSQLiteW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0'",
+	g_sSQL_UpdateSQLiteW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0',\
+															   `isadmin` TINYINT NOT NULL DEFAULT '0'",
 	g_sSQL_UpdateSQLiteP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0'",
-	g_sSQL_UpdateMySQLW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение.'",
+	g_sSQL_UpdateMySQLW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение.',\
+															  `isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом.'",
 	g_sSQL_UpdateMySQLP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов у юзера.'",
 	g_sClientIP[MAXPLAYERS+1][65];
 	
@@ -382,6 +386,10 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 		char sEscapedAdminName[257], sEscapedClientName[257], sEscapedReason[259], 
 				dbQuery[513], TempNick[128];
 		int iCurrentTime = GetTime();
+		bool bIsAdmin; // Is client admin
+
+		if(GetUserFlagBits(iClient) & (ADMFLAG_GENERIC | ADMFLAG_ROOT))
+			bIsAdmin = true;
 		
 		GetClientName(iAdmin, TempNick, sizeof(TempNick));
 		SQL_EscapeString(g_hDatabase, TempNick, sEscapedAdminName, sizeof(sEscapedAdminName));
@@ -404,9 +412,9 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 		
 		// `account_id`, `username`, `warns`
 		if(!g_bWarnTime)
-			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, g_iWarnLength == 0 ? 0 : iCurrentTime + g_iWarnLength);
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, g_iWarnLength == 0 ? 0 : iCurrentTime + g_iWarnLength, bIsAdmin);
 		else
-			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, iCurrentTime + iTime);
+			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, iCurrentTime + iTime, bIsAdmin);
 		hTxn.AddQuery(dbQuery); // 0 transaction
 		if(g_bLogQuery)
 			LogQuery("WarnPlayer::g_sSQL_WarnPlayerW: %s", dbQuery);
@@ -424,7 +432,6 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 			} else
 				EmitSoundToClient(iClient, g_sWarnSoundPath);
 	
-	
 		if (g_bPrintToChat) 
 			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_WarnPlayer", iAdmin, iClient, sReason);
 		else
@@ -436,7 +443,7 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 		if(g_bLogWarnings)
 			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) issued a warning (duration: %i (in sec.)) on PLAYER (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin] & 1, g_iAccountID[iAdmin] / 2, g_sClientIP[iAdmin], g_iWarnLength, iClient, g_iAccountID[iClient] & 1, g_iAccountID[iClient] / 2,g_sClientIP[iClient], sReason);
 		
-		WarnSystem_OnClientWarn(iAdmin, iClient, iScore, iTime, sReason);
+		WarnSystem_OnClientWarn(iAdmin, iClient, iScore, iTime, sReason, bIsAdmin);
 		
 		//We don't need to fuck db because we cached warns.
 		if ((g_iWarnings[iClient] >= g_iMaxWarns && g_iMaxWarns != 0) || (g_iScore[iClient] >= g_iMaxScore) && g_iMaxScore != 0)
