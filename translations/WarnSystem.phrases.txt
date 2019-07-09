@@ -27,7 +27,7 @@
     {
 		"#format" 	"{1:s}"
         "en"		"You have been banned for reaching maximum {1}"
-        "en"		"Вы забанены за макс. кол-во {1}"
+        "ru"		"Вы забанены за макс. кол-во {1}"
         "fr"		"Tu as ete banni apres avoir ete suffisamment {1}"
         "de"		"Du wurdest gebannt wegen Ueberschreitung der Maximalgrenze von {1}"
         "sv"		"Du har blivit bannlyst för ha nått max antal {1}"
@@ -48,7 +48,7 @@
     {
         "#format"	"{1:s}"
         "en"		"You have been kicked for receiving a warning (Reason:{1})"
-        "en"		"Вы кикнуты за предупреждение (Причина:{1})"
+        "ru"		"Вы кикнуты за предупреждение (Причина:{1})"
         "fr"        "Tu as ete kicke en guise d'avertissement (Motif: {1})"
         "de"		"Du wurdest gekickt, weil Du eine Warnung erhalten hast"
         "sv"		"Du har blivit utslängd för att ha mottagit en varning (Anledning: {1})"
@@ -78,6 +78,20 @@
         "sv"		"{blue}{1} {default}anslöt med {purple}{2} föregående varning(ar)"
         "nl"		"{blue}{1} {default}verbond met {purple}{2} vorige waarschuwing(en)"
     }
+
+    "WS_PlayerScore"
+    {
+        "#format"	"{1:N}, {2:i}"
+        "en"		"{blue}{1} {default}has connected with {purple}{2} {default}score for violations."
+        "ru"		"{blue}{1} {default}подключился. У него {purple}{2} {default}баллов за нарушения."
+    }
+
+    "WS_PlayerWarnsAndScore"
+    {
+        "#format"   "{1:N}, {2:i}, {3:i}"
+        "ru"        "{blue}{1} {default}подключился. У него {purple}{2} {default}активных предупреждений и {purple}{3} {default}баллов за нарушения."
+        "en"		"{blue}{1} {default}has connected with {purple}{2} {default}Prior Warnings and {purple}{3} score for violations."
+    }
     
     "WS_WarnPlayer"
     {
@@ -88,6 +102,24 @@
         "de"		"{olive}{1} {default}{2} wurde mit gewarnt mit dem Grund: {3}"
         "sv"		"{olive}{1} {default}utfärdade en varning på {2} med anledningen: {3}"
         "nl"		"{olive}{1} {default}heeft een waarschuwing aan {2} gegegeven met de reden: {3}"
+    }
+
+    "WS_Custom_ReasonWarn"
+    {
+        "ru"        "Своя причина"
+        "en"        "Own reason"
+    }
+
+    "WS_CustomWarn"
+    {
+        "ru"        "Введите свою причину в чат!"
+        "en"        "Write your custom reason in chat!"
+    }
+
+    "WS_Reason_Aborted"
+    {
+        "ru"        "Вы отменили ввод!"
+        "en"        "Write reason aborted"
     }
     
     "WS_WarnPlayerPersonal"
@@ -206,6 +238,24 @@
         "en"        "Client's nickname: {1}"
         "ru"        "Никнейм игрока: {1}"
     }
+
+    "WS_UnwarnMenu"
+    {
+        "ru"        "Снять предупреждение"
+        "en"        "Remove warning" 
+    }
+
+    "WS_Warn_Not_Find"
+    {
+        "ru"        "Предупреждение не найдено!"
+        "en"        "Warning not funded!"
+    }
+
+    "WS_IndexNotFunded"
+    {
+        "ru"        "Индекс игрока не был найден!"
+        "en"        "Index of player not funded!"
+    }
     
     "WS_InfoAdmin"
     {
@@ -295,7 +345,7 @@
     "WS_AdminMenuReasonTitle"
     {
         "en"		"Select reason"
-        "en"		"Выберите причину"
+        "ru"		"Выберите причину"
         "fr"        "Choisir un motif"
         "de"		"Grund wählen"
         "sv"		"Välj anledning"
@@ -367,10 +417,28 @@
     "WS_CheckWarnArguments"
     {
         "en"		"Usage: sm_checkwarn <#userid|name>"
-        "en"		"Использование: sm_checkwarn <#userid|ник>"
+        "ru"		"Использование: sm_checkwarn <#userid|ник>"
         "fr"        "Utilisation: sm_checkwarn <#userid|nom>"
         "de" 		"Benutzung: sm_checkwarn <#userid|name>"
         "sv"		"Användning: sm_checkwarn <#userid|namn>"
         "nl"		"Gebruik: sm_checkwarn <#userid|naam>"
+    }
+
+    "ws_days"
+    {
+        "ru"        "дней"
+        "en"        "days"
+    }
+
+    "ws_hours"
+    {
+        "ru"        "часов"
+        "en"        "hours"
+    }
+
+    "ws_minutes"
+    {
+        "ru"        "минут"
+        "en"        "minutes"
     }
 }

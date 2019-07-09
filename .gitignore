@@ -1,8 +1,12 @@
 /scripting/*
+/.vscode
 !/scripting/WarnSystem/
-!/scripting/include/
+!/scripting/include/WarnSystem.inc
 !/scripting/WarnSystem.sp
 !/scripting/NativeExample.sp
 !/scripting/WS_Sourcebans.sp
+!/scripting/warns_vip.sp
+!/scripting/WS_WarnAdmin.sp
+!/scripting/discord_ws.sp
 *.exe
 *.dat

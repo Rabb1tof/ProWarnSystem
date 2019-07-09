@@ -3,7 +3,7 @@
 #endif
 
 #define _warnsystem_included
-#define APIVERSION "1.4-pro"
+#define APIVERSION "1.5.2.3-pro"
 
 public SharedPlugin __pl_WarnSystem = {
     name = "WarnSystem",
@@ -31,33 +31,33 @@ public void __pl_DynamicMOTD_SetNTVOptional() {
 /*********************************************************
  * Issue a warning on a player
  *
- * @param iAdmin		The admin who issued a warning
- * @param iClient		The client to issue a warning on
+ * @param iClient		The admin who issued a warning
+ * @param iTarget		The client to issue a warning on
  * @param iScore		Amount of points awarded
  * @param sReason		The reason why you issue a warning on client
  * @noreturn		
  *********************************************************/
-native void WarnSystem_Warn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129]);
+native void WarnSystem_Warn(int iClient, int iTarget, int iScore, int iTime, char sReason[129]);
 
 /*********************************************************
  * Remove a warning on a player
  *
- * @param iAdmin		The admin who issued a warning
- * @param iClient		The client to remove the warning on
+ * @param iClient		The admin who issued a warning
+ * @param iId		    The ID of warning to remove the warning on
  * @param sReason		The reason why you remove the warning
  * @noreturn		
  *********************************************************/
-native void WarnSystem_UnWarn(int iAdmin, int iClient, char sReason[129]);
+native void WarnSystem_UnWarn(int iClient, int iId, char sReason[129]);
 
 /*********************************************************
  * Reset a players warnings
  *
- * @param iAdmin		The admin who issued a warning
- * @param iClient		The client to reset the warnings on
+ * @param iClient		The admin who issued a warning
+ * @param iTarget		The client to reset the warnings on
  * @param sReason		The reason why you reset the warnings
  * @noreturn		
  *********************************************************/
-native void WarnSystem_ResetWarn(int iAdmin, int iClient, char sReason[129]);
+native void WarnSystem_ResetWarn(int iClient, int iTarget, char sReason[129]);
 
 /*********************************************************
 * Returns database handle
@@ -70,11 +70,11 @@ native Database WarnSystem_GetDatabase();
 /*********************************************************
 * Returns count of player warns
 *
-* @param 	iClient
-* @param   iType
+* @param 	iTarget     Index of client
+* @param    iType       Type of information, where: 1 - amount warns, 2 - amount score
 * @return 	Count of client warnings
 *********************************************************/
-native int WarnSystem_GetPlayerWarns(int iClient, int iType);
+native int WarnSystem_GetPlayerInfo(int iTarget, int iType);
 
 /*********************************************************
 * Returns count of max score
@@ -103,59 +103,95 @@ native void WarnSystem_PrintToAdmins(char sMessage[256]);
 /*********************************************************
 * Calling then client data loaded successfully
 *
-* @param iClient		Client
+* @param iTarget		Client
 * @param iWarnings		Count of client warns
 * @param g_iMaxWarns	Count of max allowed warns
 * @noreturn
 *********************************************************/
-forward void WarnSystem_OnClientLoaded(int iClient, int iWarnings, int g_iMaxWarns);
+forward void WarnSystem_OnClientLoaded(int iTarget, int iWarnings, int g_iMaxWarns);
 
 /*********************************************************
 * Calling then admin issues a warn
 *
-* @param iAdmin		The admin who issued a warning
-* @param iClient		The client to warn
+* @param iClient		The admin who issued a warning
+* @param iTarget		The client to warn
 * @param sReason		The reason why he warns
 * @noreturn	
 *********************************************************/
-forward void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129]);
+forward void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, char sReason[129], bool bIsAdmin);
+
+/*********************************************************
+* Calling after admin give a warn
+*
+* @param iClient		The admin who give a warning
+* @param iTarget		The client to warn
+* @param iTime          Time of warning
+* @param iScore         Amount score of warning
+* @param sReason		The reason why he be warned
+* @noreturn	
+*********************************************************/
+forward Action WarnSystem_OnClientWarnPre(int iClient, int iTarget, int iTime, int iScore, char sReason[129]);
 
 /*********************************************************
 * Calling then admin issues a unwarn
 *
-* @param iAdmin		The admin who issued a unwarning
-* @param iClient		The client to unwarn
-* @param sReason		The reason why he un6warns
+* @param iClient		The admin who issued a unwarning
+* @param iTarget		The client to unwarn
+* @param iId            Id of warning
+* @param iScore         Amount score of warning
+* @param sReason		The reason why he be unwarned
 * @noreturn	
 *********************************************************/
-forward void WarnSystem_OnClientUnWarn(int iAdmin, int iClient, int iScore, char sReason[129]);
+forward void WarnSystem_OnClientUnWarn(int iClient, int iTarget, int iId, int iScore, char sReason[129]);
+
+/*********************************************************
+* Calling after admin issues a unwarn
+*
+* @param iClient		The admin who issued a unwarning
+* @param iTarget		The client to unwarn
+* @param iId            Id of warning
+* @param iScore         Amount score of warning
+* @param sReason		The reason why he unwarns
+* @noreturn	
+*********************************************************/
+forward Action WarnSystem_OnClientUnWarnPre(int iClient, int iTarget, int iId, int iScore, char sReason[129]);
 
 /*********************************************************
 * Calling then admin issues a warn reset
 *
-* @param iAdmin		The admin who issued a warn reset
-* @param iClient		The client to reset warns
+* @param iClient		The admin who issued a warn reset
+* @param iTarget		The client to reset warns
 * @param sReason		The reason why he reset warns
 * @noreturn	
 *********************************************************/
-forward void WarnSystem_OnClientResetWarns(int iAdmin, int iClient, char sReason[129]);
+forward void WarnSystem_OnClientResetWarns(int iClient, int iTarget, char sReason[129]);
+
+/*********************************************************
+* Calling before admin issues a warn reset
+*
+* @param iClient		The admin who issued a warn reset
+* @param iTarget		The client to reset warns
+* @param sReason		The reason why he reset warns
+* @noreturn	
+*********************************************************/
+forward Action WarnSystem_OnClientResetWarnsPre(int iClient, int iTarget, char sReason[129])
 
 /*********************************************************
 * Calling on warn to punish player
 *
-* @param iAdmin		The admin who issued warn
-* @param iClient		The client
+* @param iClient		The admin who issued warn
+* @param iTarget		The client
 * @param sReason		The ban reason
 * @return Return Plugin_Stop or core will log error
 *********************************************************/
-forward Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129]);
+forward Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght, char sReason[129]);
 
 /*********************************************************
 * Calling on maxwarns to punish player
 *
-* @param iAdmin		The admin who issued warn
-* @param iClient		The client
+* @param iClient		The admin who issued warn
+* @param iTarget		The client
 * @param sReason		The ban reason
 * @return Return Plugin_Stop or core will log error
 *********************************************************/
-forward Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129]);
+forward Action WarnSystem_WarnMaxPunishment(int iClient, int iTarget, int iBanLenght, char sReason[129]);

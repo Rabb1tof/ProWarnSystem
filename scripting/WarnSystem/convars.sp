@@ -1,11 +1,11 @@
 ConVar g_hCvarMaxWarns, g_hCvarMaxPunishment, g_hCvarBanLength, g_hCvarPunishment, g_hCvarSlapDamage, g_hCvarPrintToAdmins,
 	   g_hCvarLogWarnings, g_hCvarWarnSound, g_hCvarWarnSoundPath, g_hCvarResetWarnings, g_hCvarPrintToChat, 
-	   g_hCvarDeleteExpired, g_hCvarLogQuery, g_hCvarWarnLength, g_hCvarWarnTime, g_hCvarMaxScore,
-	   g_hCvarWarnType;
+	   g_hCvarDeleteExpired, g_hCvarLogQuery, g_hCvarWarnLength, g_hCvarScoreLength, g_hCvarWarnTime, g_hCvarMaxScore,
+	   g_hCvarWarnType, g_hCvarUseCustom;
 
 bool g_bResetWarnings, g_bWarnSound, g_bPrintToAdmins, g_bLogWarnings, g_bPrintToChat, g_bDeleteExpired,
-		g_bLogQuery, g_bWarnTime;
-int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iSlapDamage, g_iWarnLength, g_iMaxScore,
+		g_bLogQuery, g_bWarnTime, g_bUseCustom;
+int g_iMaxWarns, g_iPunishment, g_iMaxPunishment, g_iBanLenght, g_iScoreLength, g_iSlapDamage, g_iWarnLength, g_iMaxScore,
     g_iWarnType;
 char g_sWarnSoundPath[PLATFORM_MAX_PATH];
 
@@ -27,10 +27,12 @@ public void InitializeConVars()
 	g_hCvarDeleteExpired = CreateConVar("sm_warns_delete_expired", "1", "Delete expired warnings of DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0);
 	g_hCvarLogQuery = CreateConVar("sm_warns_enable_querylog", "0", "Logging query to DB: 0 - disabled, 1 - enabled", _, true, 0.0, true, 1.0);
 	g_hCvarWarnLength = CreateConVar("sm_warns_warnlength", "86400", "Duration of the issued warning in seconds (0 - permanent).");
+	g_hCvarScoreLength = CreateConVar("sm_warns_score_default", "10");
 	g_hCvarWarnTime = CreateConVar("sm_warns_warntime_type", "1", "Take duration from config if set 1 or from cvar ('sm_warns_warnlength') for all if set 0: 0 - cvar, 1 - config.");
 	g_hCvarMaxScore = CreateConVar("sm_warns_maxscore", "50", "Max score (points) before punishment", _, true, 0.0);
-	g_hCvarWarnType = CreateConVar("sm_warns_warntype", "1", "Работа все системы: (0 - по колличеству предупреждений, 1 - система баллов, 2 - оба варианта.", _, true, 0.0, true, 2.0);
-	
+	g_hCvarWarnType = CreateConVar("sm_warns_warntype", "2", "Работа всей системы: (0 - по колличеству предупреждений, 1 - система баллов, 2 - оба варианта.", _, true, 0.0, true, 2.0);
+	g_hCvarUseCustom = CreateConVar("sm_warns_use_custom", "1", "Разрешить кастомные причины и их время: (1 - разрешить, 0 - запретить).", _, true, 0.0, true, 1.0);	
+
 	g_hCvarWarnType.AddChangeHook(ChangeCvar_WarnType);
 	g_hCvarMaxWarns.AddChangeHook(ChangeCvar_MaxWarns);
 	g_hCvarWarnTime.AddChangeHook(ChangeCvar_WarnTime);
@@ -38,6 +40,7 @@ public void InitializeConVars()
 	g_hCvarLogQuery.AddChangeHook(ChangeCvar_LogQuery);
 	g_hCvarWarnSound.AddChangeHook(ChangeCvar_WarnSound);
 	g_hCvarBanLength.AddChangeHook(ChangeCvar_BanLength);
+	g_hCvarScoreLength.AddChangeHook(ChangeCvar_ScoreLength);
 	g_hCvarWarnLength.AddChangeHook(ChangeCvar_WarnLength);
 	g_hCvarPunishment.AddChangeHook(ChangeCvar_Punishment);
 	g_hCvarSlapDamage.AddChangeHook(ChangeCvar_SlapDamage);
@@ -48,6 +51,7 @@ public void InitializeConVars()
 	g_hCvarDeleteExpired.AddChangeHook(ChangeCvar_DeleteExpired);
 	g_hCvarMaxPunishment.AddChangeHook(ChangeCvar_MaxPunishment);
 	g_hCvarResetWarnings.AddChangeHook(ChangeCvar_ResetWarnings);
+	g_hCvarUseCustom.AddChangeHook(ChangeCvar_UseCustom);
 	
 	
 	AutoExecConfig(true, "core", "warnsystem");
@@ -64,6 +68,7 @@ public void OnConfigsExecuted()
 	g_iBanLenght = g_hCvarBanLength.IntValue;
 	g_iSlapDamage = g_hCvarSlapDamage.IntValue;
 	g_iWarnLength = g_hCvarWarnLength.IntValue;
+	g_iScoreLength = g_hCvarScoreLength.IntValue;
 	g_bWarnTime = g_hCvarWarnTime.BoolValue;
 	
 	g_bWarnSound = g_hCvarWarnSound.BoolValue;
@@ -74,6 +79,8 @@ public void OnConfigsExecuted()
 	g_bLogWarnings = g_hCvarLogWarnings.BoolValue;
 	g_bLogQuery = g_hCvarLogQuery.BoolValue;
 	g_bDeleteExpired = g_hCvarDeleteExpired.BoolValue;
+	
+	g_bUseCustom = g_hCvarUseCustom.BoolValue;
 }
 
 public void ChangeCvar_WarnType(ConVar convar, const char[] oldValue, const char[] newValue) { g_iWarnType = convar.IntValue; }
@@ -84,6 +91,7 @@ public void ChangeCvar_Punishment(ConVar convar, const char[] oldValue, const ch
 public void ChangeCvar_MaxPunishment(ConVar convar, const char[] oldValue, const char[] newValue){g_iMaxPunishment = convar.IntValue;}
 public void ChangeCvar_BanLength(ConVar convar, const char[] oldValue, const char[] newValue){g_iBanLenght = convar.IntValue;}
 public void ChangeCvar_WarnLength(ConVar convar, const char[] oldValue, const char[] newValue){g_iWarnLength = convar.IntValue;}
+public void ChangeCvar_ScoreLength(ConVar convar, const char[] oldValue, const char[] newValue){g_iScoreLength = convar.IntValue;}
 public void ChangeCvar_SlapDamage(ConVar convar, const char[] oldValue, const char[] newValue){g_iSlapDamage = convar.IntValue;}
 public void ChangeCvar_WarnSound(ConVar convar, const char[] oldValue, const char[] newValue){g_bWarnSound = convar.BoolValue;}
 public void ChangeCvar_WarnSoundPath(ConVar convar, const char[] oldValue, const char[] newValue){convar.GetString(g_sWarnSoundPath, sizeof(g_sWarnSoundPath));}
@@ -93,3 +101,4 @@ public void ChangeCvar_LogWarnings(ConVar convar, const char[] oldValue, const c
 public void ChangeCvar_DeleteExpired(ConVar convar, const char[] oldValue, const char[] newValue){g_bDeleteExpired = convar.BoolValue;}
 public void ChangeCvar_LogQuery(ConVar convar, const char[] oldValue, const char[] newValue){g_bLogQuery = convar.BoolValue;}
 public void ChangeCvar_WarnTime(ConVar convar, const char[] oldValue, const char[] newValue){g_bWarnTime = convar.BoolValue;}
+public void ChangeCvar_UseCustom(ConVar convar, const char[] oldValue, const char[] newValue){g_bUseCustom = convar.BoolValue;}
