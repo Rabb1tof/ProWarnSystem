@@ -30,7 +30,7 @@ public void InitializeConVars()
 	g_hCvarScoreLength = CreateConVar("sm_warns_score_default", "10");
 	g_hCvarWarnTime = CreateConVar("sm_warns_warntime_type", "1", "Take duration from config if set 1 or from cvar ('sm_warns_warnlength') for all if set 0: 0 - cvar, 1 - config.");
 	g_hCvarMaxScore = CreateConVar("sm_warns_maxscore", "50", "Max score (points) before punishment", _, true, 0.0);
-	g_hCvarWarnType = CreateConVar("sm_warns_warntype", "2", "Работа все системы: (0 - по колличеству предупреждений, 1 - система баллов, 2 - оба варианта.", _, true, 0.0, true, 2.0);
+	g_hCvarWarnType = CreateConVar("sm_warns_warntype", "2", "Работа всей системы: (0 - по колличеству предупреждений, 1 - система баллов, 2 - оба варианта.", _, true, 0.0, true, 2.0);
 	g_hCvarUseCustom = CreateConVar("sm_warns_use_custom", "1", "Разрешить кастомные причины и их время: (1 - разрешить, 0 - запретить).", _, true, 0.0, true, 1.0);	
 
 	g_hCvarWarnType.AddChangeHook(ChangeCvar_WarnType);
