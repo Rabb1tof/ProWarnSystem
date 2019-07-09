@@ -1,5 +1,6 @@
 Handle g_hAdminMenu;
-int g_iTarget[MAXPLAYERS+1];
+int g_iTarget[MAXPLAYERS+1], g_iDataID[MAXPLAYERS+1];
+bool g_bUnwarn[MAXPLAYERS+1];
 
 public void InitializeMenu(Handle hTopMenu)
 {
@@ -133,7 +134,9 @@ public int MenuHandler_UnWarn(Menu menu, MenuAction action, int param1, int para
 			else
 			{
 				g_iTarget[param1] = iTarget;
-				DisplayUnWarnReasons(param1);
+				g_bUnwarn[param1] = true;
+				CheckPlayerWarns(param1, iTarget);
+				//DisplayUnWarnReasons(param1);
 			}
 		}
 		case MenuAction_Cancel:
@@ -370,7 +373,8 @@ public int MenuHandler_PreformUnWarn(Menu hMenu, MenuAction action, int param1, 
 			for(int i = 0; i < g_aUnwarn.Length; i++) {
 				StringMap hUnwarn = g_aUnwarn.Get(i);
 				if(hUnwarn.GetString("unwarn", szReason, sizeof(szReason)) && StrEqual(szReason, szInfo)) {
-					UnWarnPlayer(param1, g_iTarget[param1], szReason);
+					FindWarn(param1, g_iDataID[param1], szReason);
+					g_iDataID[param1] = 0;
 					break;
 				}
 			}
@@ -439,9 +443,8 @@ public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[
 	
 	IntToString(iScore, szScore, sizeof(szScore));
 	GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
-	//UTIL_FormatTime(szTimeFormat, sizeof(szTimeFormat), "%X", iTime);
 	UTIL_FormatTime(iTime, szTimeFormat, sizeof(szTimeFormat));
-	PrintToChatAll("Time: %d\nTime: %s", iTime, szTimeFormat);
+	//PrintToChatAll("Time: %d\nTime: %s", iTime, szTimeFormat);
 	
 	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
 		
@@ -509,7 +512,7 @@ void DisplayCheckWarnsMenu(DBResultSet hDatabaseResults, Handle hCheckData)
 		iDate = hDatabaseResults.FetchInt(3);
 		
 		
-		UTIL_FormatTime(iDate, szTimeFormat, sizeof(szTimeFormat));
+		FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
 		FormatEx(szBuffer, sizeof(szBuffer), "[%s] %s", szAdmin, szTimeFormat);
 		hMenu.AddItem(szID, szBuffer);
 	}
@@ -526,7 +529,7 @@ public int CheckPlayerWarnsMenu(Menu hMenu, MenuAction action, int param1, int i
 			char szID[25];
 			int iID;
 			hMenu.GetItem(iItem, szID, sizeof(szID));
-			iID = StringToInt(szID);
+			g_iDataID[param1] = iID = StringToInt(szID);
 			
 			FormatEx(szdbQuery, sizeof(szdbQuery),  g_sSQL_GetInfoWarn, iID);
 			g_hDatabase.Query(SQL_GetInfoWarn, szdbQuery, param1); // OH NO! DB-query in menus.sp!!! FUCK!!!
@@ -554,6 +557,14 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 	
 	Menu hMenu = new Menu(GetInfoWarnMenu_CallBack);
 	hMenu.SetTitle("%T:\n", "WS_InfoWarn", iAdmin);
+
+	if(g_bUnwarn[iAdmin])
+	{
+		FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_UnwarnMenu", iAdmin);
+		hMenu.AddItem("unwarn", szBuffer);
+		g_bUnwarn[iAdmin] = false;
+		//DisplayUnWarnReasons(iAdmin);
+	}
 	
 	SQL_FetchString(hDatabaseResults, 1, szAdmin, sizeof(szAdmin));
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoAdmin", iAdmin, szAdmin);
@@ -569,10 +580,10 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 	iDate    = hDatabaseResults.FetchInt(7);
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoScore", iAdmin, iScore);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
-	UTIL_FormatTime(iExpired, szTimeFormat, sizeof(szTimeFormat));
+	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iExpired);
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoExpired", iAdmin, szTimeFormat);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
-	UTIL_FormatTime(iDate, szTimeFormat, sizeof(szTimeFormat));
+	FormatTime(szTimeFormat, sizeof(szTimeFormat), "%Y-%m-%d %X", iDate);
 	FormatEx(szBuffer, sizeof(szBuffer), "%T", "WS_InfoTime", iAdmin, szTimeFormat);
 	hMenu.AddItem(NULL_STRING, szBuffer, ITEMDRAW_DISABLED);
 	
@@ -584,6 +595,12 @@ void DisplayInfoAboutWarn(DBResultSet hDatabaseResults, any iAdmin)
 public int GetInfoWarnMenu_CallBack(Menu hMenu, MenuAction action, int iAdmin, int iItem)
 {
 	switch(action){
+		case MenuAction_Select: {
+			char szInfo[10];
+			hMenu.GetItem(iItem, szInfo, sizeof(szInfo));
+			if(StrEqual(szInfo, "unwarn"))
+				DisplayUnWarnReasons(iAdmin); // не закончено
+		}
 		case MenuAction_End:    CloseHandle(hMenu);
 		case MenuAction_Cancel: if(iItem == MenuCancel_ExitBack)    CheckPlayerWarns(iAdmin, GetClientOfUserId(g_iUserID[iAdmin]));
 	}

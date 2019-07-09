@@ -51,9 +51,9 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 		}
 		char sBuffer[128], sReason[129];
 		GetCmdArg(1, sBuffer, sizeof(sBuffer));
-		int iTarget = FindTarget(iClient, sBuffer, true, true);
-		if (!iTarget)
-			return Plugin_Handled;
+		int iId = StringToInt(sBuffer);
+		/*if (!iId)
+			return Plugin_Handled;*/
 		/*GetCmdArg(3, sBuffer, sizeof(sBuffer));
 		int iScore = StringToInt(sBuffer);*/
 		
@@ -65,7 +65,7 @@ public Action Command_UnWarnPlayer(int iClient, int iArgs)
 				Format(sReason, sizeof(sReason), "%s %s", sReason, sBuffer);
 			}
 		
-		UnWarnPlayer(iClient, iTarget, sReason);
+		FindWarn(iClient, iId, sReason);
 		return Plugin_Handled;
 	}	return Plugin_Continue;
 }

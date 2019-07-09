@@ -88,3 +88,15 @@ stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
     }
     return false;
 }
+
+stock int FindClientByAccountID(int iAccountID)
+{
+	int iTargetAccountID;
+	for(int i = 1; i < MaxClients; i++)
+	{
+		iTargetAccountID = GetSteamAccountID(i);
+		if(iAccountID == iTargetAccountID)
+			return i;
+	}
+	return -1;
+}

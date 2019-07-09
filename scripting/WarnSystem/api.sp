@@ -16,10 +16,10 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] sError, int iErr
 	
 	g_hGFwd_OnClientLoaded = CreateGlobalForward("WarnSystem_OnClientLoaded", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell);
 	g_hGFwd_OnClientWarn = CreateGlobalForward("WarnSystem_OnClientWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
-	g_hGFwd_OnClientUnWarn = CreateGlobalForward("WarnSystem_OnClientUnWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_String);
+	g_hGFwd_OnClientUnWarn = CreateGlobalForward("WarnSystem_OnClientUnWarn", ET_Ignore, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns = CreateGlobalForward("WarnSystem_OnClientResetWarns", ET_Ignore, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientWarn_Pre = CreateGlobalForward("WarnSystem_OnClientWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String, Param_Cell);
-	g_hGFwd_OnClientUnWarn_Pre = CreateGlobalForward("WarnSystem_OnClientUnWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_String);
+	g_hGFwd_OnClientUnWarn_Pre = CreateGlobalForward("WarnSystem_OnClientUnWarnPre", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_OnClientResetWarns_Pre = CreateGlobalForward("WarnSystem_OnClientResetWarnsPre", ET_Hook, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_WarnPunishment = CreateGlobalForward("WarnSystem_WarnPunishment", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_String);
 	g_hGFwd_WarnMaxPunishment = CreateGlobalForward("WarnSystem_WarnMaxPunishment", ET_Hook, Param_Cell, Param_Cell, Param_Cell, Param_String);
@@ -50,12 +50,12 @@ public int Native_WarnPlayer(Handle hPlugin, int iNumParams)
 public int Native_UnWarnPlayer(Handle hPlugin, int iNumParams)
 {
 	int iClient = GetNativeCell(1);
-	int iTarget = GetNativeCell(2);
+	int iId = GetNativeCell(2);
 	//int iScore = GetNativeCell(3);
 	char sReason[129];
-	GetNativeString(4, sReason, sizeof(sReason));
-	if (IsValidClient(iTarget) && -1<iClient<=MaxClients)
-		UnWarnPlayer(iClient, iTarget, sReason);
+	GetNativeString(3, sReason, sizeof(sReason));
+	if (IsValidClient(iClient))
+		FindWarn(iClient, iId, sReason);
 	else
 		ThrowNativeError(2, "Native_UnWarnPlayer: Client or admin index is invalid.");
 }
@@ -118,11 +118,12 @@ void WarnSystem_OnClientWarn(int iClient, int iTarget, int iScore, int iTime, ch
 	Call_Finish();
 }
 
-void WarnSystem_OnClientUnWarn(int iClient, int iTarget, int iScore, char sReason[129])
+void WarnSystem_OnClientUnWarn(int iClient, int iTarget, int iId, int iScore, char sReason[129])
 {
 	Call_StartForward(g_hGFwd_OnClientUnWarn);
 	Call_PushCell(iClient);
 	Call_PushCell(iTarget);
+	Call_PushCell(iId);
 	Call_PushCell(iScore);
 	Call_PushString(sReason);
 	Call_Finish();
@@ -150,12 +151,14 @@ Action WarnSystem_OnClientWarnPre(int iClient, int iTarget, int iTime, int iScor
 	return act;
 }
 
-Action WarnSystem_OnClientUnWarnPre(int iClient, int iTarget, char sReason[129])
+Action WarnSystem_OnClientUnWarnPre(int iClient, int iTarget, int iId, int iScore, char sReason[129])
 {
 	Action act = Plugin_Continue;
 	Call_StartForward(g_hGFwd_OnClientUnWarn_Pre);
 	Call_PushCell(iClient);
 	Call_PushCell(iTarget);
+	Call_PushCell(iId);
+	Call_PushCell(iScore);
 	Call_PushString(sReason);
 	Call_Finish(act);
 	return act;

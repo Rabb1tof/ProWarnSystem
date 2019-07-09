@@ -78,6 +78,20 @@
         "sv"		"{blue}{1} {default}anslöt med {purple}{2} föregående varning(ar)"
         "nl"		"{blue}{1} {default}verbond met {purple}{2} vorige waarschuwing(en)"
     }
+
+    "WS_PlayerScore"
+    {
+        "#format"	"{1:N}, {2:i}"
+        "en"		"{blue}{1} {default}has connected with {purple}{2} {default}score for violations."
+        "ru"		"{blue}{1} {default}подключился. У него {purple}{2} {default}баллов за нарушения."
+    }
+
+    "WS_PlayerWarnsAndScore"
+    {
+        "#format"   "{1:N}, {2:i}, {3:i}"
+        "ru"        "{blue}{1} {default}подключился. У него {purple}{2} {default}активных предупреждений и {purple}{3} {default}баллов за нарушения."
+        "en"		"{blue}{1} {default}has connected with {purple}{2} {default}Prior Warnings and {purple}{3} score for violations."
+    }
     
     "WS_WarnPlayer"
     {
@@ -223,6 +237,24 @@
         "#format"   "{1:s}"
         "en"        "Client's nickname: {1}"
         "ru"        "Никнейм игрока: {1}"
+    }
+
+    "WS_UnwarnMenu"
+    {
+        "ru"        "Снять предупреждение"
+        "en"        "Remove warning" 
+    }
+
+    "WS_Warn_Not_Find"
+    {
+        "ru"        "Предупреждение не найдено!"
+        "en"        "Warning not funded!"
+    }
+
+    "WS_IndexNotFunded"
+    {
+        "ru"        "Индекс игрока не был найден!"
+        "en"        "Index of player not funded!"
     }
     
     "WS_InfoAdmin"

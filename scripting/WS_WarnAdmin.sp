@@ -48,8 +48,9 @@ public int SBGetDatabase(Handle owner, Handle hndl, const char[] error, any data
 }
 #endif
 
-public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])
+public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129], bool bIsAdmin)
 {
+	if(!bIsAdmin) 	return;
 	int iMaxWarn = WarnSystem_GetMaxWarns(), 
 		iMaxScore = WarnSystem_GetMaxScore();
 	int	iScoreClient = WarnSystem_GetPlayerInfo(iClient, 2), 
@@ -65,16 +66,16 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
 		{
 			FormatEx(szBuffer, sizeof(szBuffer), "UPDATE `sb_admins` SET 'expired' = UNIX_TIMESTAMP() WHERE `authid` IN('STEAM_0:%i:%i', STEAM_1:%i:%i, '%i+76561197960265728')", iAccountIDC & 1, iAccountIDC / 2, 
 				iAccountIDC & 1, iAccountIDC / 2, iAccountIDC);
-			char szBuffer[64];
+			char szSteamID[64];
 			AdminId aAdmin[2]; 
-			FormatEx(szBuffer, sizeof(szBuffer), "STEAM_1:%i:%i")
-			aAdmin[0] = FindAdminByIdentity("steam", szBuffer);
-			FormatEx(szBuffer, sizeof(szBuffer), "STEAM_0:%i:%i")
-			aAdmin[1] = FindAdminByIdentity("steam", szBuffer);
+			FormatEx(szSteamID, sizeof(szSteamID), "STEAM_1:%i:%i");
+			aAdmin[0] = FindAdminByIdentity("steam", szSteamID);
+			FormatEx(szSteamID, sizeof(szSteamID), "STEAM_0:%i:%i");
+			aAdmin[1] = FindAdminByIdentity("steam", szSteamID);
 			if(aAdmin[0] != INVALID_ADMIN_ID) 
-				RemoveAdmin(aAdmin[0])
+				RemoveAdmin(aAdmin[0]);
 			else if(aAdmin[1] != INVALID_ADMIN_ID)
-				RemoveAdmin(aAdmin[1])
+				RemoveAdmin(aAdmin[1]);
 		}
 		else
 		{

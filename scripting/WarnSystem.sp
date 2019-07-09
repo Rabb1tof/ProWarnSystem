@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
 #define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.5.2.3"
+#define PLUGIN_VERSION      "1.6"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -139,7 +139,7 @@ public Action OnClientSayCommand(int iClient, const char[] szCommand, const char
 	switch(g_iCustom[iClient])		
 	{
 		case 1: 	WarnPlayer(iClient, g_iTarget[iClient], g_iScoreLength, g_iWarnLength, szReason); // issue a warning	
-		case 2:		UnWarnPlayer(iClient, g_iTarget[iClient], szReason);
+		case 2:		FindWarn(iClient, g_iDataID[iClient], szReason);
 		case 3:		ResetPlayerWarns(iClient, g_iTarget[iClient], szReason);
 		//return Plugin_Handled; // block the reason to be sent in chat
 	}
