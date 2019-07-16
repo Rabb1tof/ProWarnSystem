@@ -81,14 +81,14 @@
 
     "WS_PlayerScore"
     {
-        "#format"	"{1:N}, {2:i}"
+        "#format"	"{1:N},{2:i}"
         "en"		"{blue}{1} {default}has connected with {purple}{2} {default}score for violations."
         "ru"		"{blue}{1} {default}подключился. У него {purple}{2} {default}баллов за нарушения."
     }
 
     "WS_PlayerWarnsAndScore"
     {
-        "#format"   "{1:N}, {2:i}, {3:i}"
+        "#format"   "{1:N},{2:i},{3:i}"
         "ru"        "{blue}{1} {default}подключился. У него {purple}{2} {default}активных предупреждений и {purple}{3} {default}баллов за нарушения."
         "en"		"{blue}{1} {default}has connected with {purple}{2} {default}Prior Warnings and {purple}{3} score for violations."
     }

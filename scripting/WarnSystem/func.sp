@@ -7,7 +7,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 		if (IsValidClient(i) && (GetUserFlagBits(i) & ADMFLAG_GENERIC))
 		{	
 			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
-			CPrintToChat(i, "%s", sBuffer);
+			WS_PrintToChat(i, "%s", sBuffer);
 		}
 }
 

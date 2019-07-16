@@ -38,7 +38,7 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	`client_id` INTEGER NOT NULL, \
 	`server_id` INTEGER NOT NULL, \
 	`reason` VARCHAR(128) NOT NULL, \
-	`score` INTEGER, \
+	`score` INTEGER NOT NULL DEFAULT '0', \
 	`created_at` INTEGER NOT NULL, \
 	`expires_at` INTEGER NOT NULL, \
 	`deleted` TINYINT NOT NULL DEFAULT '0', \
@@ -70,8 +70,8 @@ WHERE `ws_warn`.`warn_id` = '%i' AND\
 `ws_warn`.`server_id` = '%i'",
 	g_sSQL_CheckData[] = "SELECT `username`, `warns`, `score` FROM `ws_player` WHERE `account_id` = '%i'",
 	g_sSQL_UploadData[] = "INSERT INTO `ws_player` (`account_id`, `username`, `warns`, `score`) VALUES ('%i', '%s', '%i', '%i');",
-	g_sSQL_UpdateData[] = "UPDATE `ws_player` SET `warns` = ( SELECT COUNT(*) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0' ), `score` = ( \
-SELECT SUM(`score`) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0'),\
+	g_sSQL_UpdateData[] = "UPDATE `ws_player` SET `warns` = ( IFNULL((SELECT COUNT(*) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0'), '0')), `score` = ( \
+IFNULL((SELECT SUM(`score`) FROM `ws_warn` WHERE `client_id` = '%i' AND `deleted` = '0'), '0')),\
 		`username` = '%s' WHERE `account_id` = '%i';",
 	g_sSQL_LoadPlayerData[] = "SELECT COUNT(`warn_id`), SUM(`score`) FROM `ws_warn` WHERE `client_id` = '%i' AND `server_id` = '%i' AND `deleted` = '0';",
 	g_sSQL_UnwarnPlayerW[] = "UPDATE `ws_warn` SET `deleted` = '1' WHERE `warn_id` = '%i';",

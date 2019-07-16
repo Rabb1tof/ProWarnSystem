@@ -434,7 +434,7 @@ public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[
 		return;
 	}
 	
-	char sBuffer[128], szAdmin[20], szTimeFormat[128], szScore[8];
+	char sBuffer[128], szAdmin[20], szTimeFormat[128], szScore[8], szPlayerScore[8], szPlayerWarnings[8];
 	
 	Handle hMenu = CreatePanel();
 	FormatEx(sBuffer, sizeof(sBuffer), "%T", "WS_AgreementTitle", iClient);
@@ -442,16 +442,20 @@ public void BuildAgreement(int iClient, int iAdmin, int iScore, int iTime, char[
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
 	
 	IntToString(iScore, szScore, sizeof(szScore));
+	IntToString(g_iScore[iClient], szPlayerScore, sizeof(szPlayerScore));
+	IntToString(g_iWarnings[iClient], szPlayerWarnings, sizeof(szPlayerWarnings));
 	GetClientName(iAdmin, szAdmin, sizeof(szAdmin));
 	UTIL_FormatTime(iTime, szTimeFormat, sizeof(szTimeFormat));
 	//PrintToChatAll("Time: %d\nTime: %s", iTime, szTimeFormat);
 	
 	while(!IsEndOfFile(hFilePath) && ReadFileLine(hFilePath, sBuffer, sizeof(sBuffer))) {
-		
+
 		ReplaceString(sBuffer, sizeof(sBuffer), "{ADMIN}", szAdmin, false);
 		ReplaceString(sBuffer, sizeof(sBuffer), "{REASON}", szReason, false);
 		ReplaceString(sBuffer, sizeof(sBuffer), "{TIME}", szTimeFormat, false);
 		ReplaceString(sBuffer, sizeof(sBuffer), "{SCORE}", szScore, false);
+		ReplaceString(sBuffer, sizeof(sBuffer), "{PLAYERSCORE}", szPlayerScore, false);
+		ReplaceString(sBuffer, sizeof(sBuffer), "{PLAYERWARNS}", szPlayerWarnings, false);
 		DrawPanelText(hMenu, sBuffer);
 	}
 	DrawPanelItem(hMenu, " ", ITEMDRAW_SPACER|ITEMDRAW_RAWLINE);
