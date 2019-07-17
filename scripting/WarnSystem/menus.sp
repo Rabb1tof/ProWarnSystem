@@ -71,7 +71,7 @@ stock void AddTargetsToMenuCustom(Menu hMenu, int iAdmin)
 {
 	char sUserId[12], sName[128], sDisplay[128+12];
 	for (int i = 1; i <= MaxClients; ++i) {
-		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && /*iAdmin != i &&*/ CanUserTarget(iAdmin, i))
+		if (IsClientConnected(i) && !IsClientInKickQueue(i) && !IsFakeClient(i) && IsClientInGame(i) && iAdmin != i && CanUserTarget(iAdmin, i))
 		{
 			GetClientName(i, sName, sizeof(sName));
 			switch(g_iWarnType) {

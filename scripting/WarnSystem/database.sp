@@ -392,11 +392,11 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iTime, iScore, sReason) == Plugin_Continue)
 	{
-		/*if (iAdmin == iClient)
+		if (iAdmin == iClient)
 		{
 			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}*/
+		}
 		char sEscapedAdminName[257], sEscapedClientName[257], sEscapedReason[259], 
 				dbQuery[513], TempNick[128];
 		int iCurrentTime = GetTime();
@@ -487,12 +487,6 @@ public void FindWarn(int iAdmin, int iId, char sReason[129])
 {
 	if(IsValidClient(iAdmin))
 	{
-		/*if (iAdmin == iClient)
-		{
-			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
-			return;
-		}*/
-
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_FindWarn, iId, g_iServerID);
 
@@ -547,28 +541,13 @@ public void UnwarnPlayer(int iAdmin, int iClient, int iId, int iScore, char sRea
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, iId, iScore, sReason) == Plugin_Continue)
 	{
-		/*if (iAdmin == iClient)
+		if (iAdmin == iClient)
 		{
 			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}*/
+		}
 		
 		char dbQuery[513];
-		/*FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
-		
-		Handle hUnwarnData = CreateDataPack();
-		if (iAdmin)
-			WritePackCell(hUnwarnData, GetClientUserId(iAdmin));
-		else
-			WritePackCell(hUnwarnData, 0);
-		WritePackCell(hUnwarnData, iAdmin ? GetClientUserId(iAdmin) : 0);
-		WritePackCell(hUnwarnData, GetClientUserId(iClient));
-		WritePackString(hUnwarnData, sReason);
-		ResetPack(hUnwarnData);
-		
-		g_hDatabase.Query(SQL_UnWarnPlayer, dbQuery, hUnwarnData);
-		if(g_bLogQuery)
-			LogQuery("UnWarnPlayer::SQL_UnWarnPlayer: %s", dbQuery); */
 
 		switch(g_iWarnType) {
 			case 0: --g_iWarnings[iClient];
@@ -607,80 +586,17 @@ public void UnwarnPlayer(int iAdmin, int iClient, int iId, int iScore, char sRea
 	}
 }
 
-/*public void SQL_UnWarnPlayer(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, Handle hUnwarnData)
-{
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
-	{
-		LogWarnings("[WarnSystem] SQL_UnWarnPlayer - error while working with data (%s)", sError);
-		return;
-	}
-	
-	char sReason[129], dbQuery[513];
-	int iAdmin, iClient;
-	
-	if(hUnwarnData)
-	{
-		iAdmin = GetClientOfUserId(ReadPackCell(hUnwarnData));
-		iClient = GetClientOfUserId(ReadPackCell(hUnwarnData));
-		ReadPackString(hUnwarnData, sReason, sizeof(sReason));
-		CloseHandle(hUnwarnData);
-	} else return;
-	
-	if (hDatabaseResults.FetchRow())
-	{
-		int iID, iScore;
-		iID    			  = hDatabaseResults.FetchInt(0);
-		iScore 			  = hDatabaseResults.FetchInt(1);
-		
-		switch(g_iWarnType) {
-			case 0: --g_iWarnings[iClient];
-			case 1: g_iScore[iClient] -= iScore;
-			case 2: {
-						--g_iWarnings[iClient];
-						g_iScore[iClient] -= iScore;
-			}
-		}
-		
-		Transaction hTxn = new Transaction();
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerW, iID);
-		hTxn.AddQuery(dbQuery); // 0 transaction
-		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerW: %s", dbQuery);
-		char szName[64];
-		GetClientName(iClient, szName, sizeof(szName));
-		FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_UnwarnPlayerP, szName, g_iWarnings[iClient], g_iScore[iClient], g_iAccountID[iClient]);
-		hTxn.AddQuery(dbQuery); // 1 transaction
-		if(g_bLogQuery)
-			LogQuery("SQL_UnWarnPlayer::g_sSQL_UnwarnPlayerP: %s", dbQuery);
-		g_hDatabase.Execute(hTxn, SQL_TransactionSuccefully, SQL_TransactionFailed, 3);
-		
-		if (g_bPrintToChat)
-			WS_PrintToChatAll(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-		else
-		{
-			PrintToAdmins(" %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayer", iAdmin, iClient, sReason);
-			WS_PrintToChat(iClient, " %t %t", "WS_ColoredPrefix", "WS_UnWarnPlayerPersonal", iAdmin, sReason);
-		}
-		
-		if (g_bLogWarnings)
-			LogWarnings("[WarnSystem] ADMIN (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) removed a warning on PLAYER (NICK: %N | STEAMID32: STEAM_1:%i:%i | IP: %s) with reason: %s", iAdmin, g_iAccountID[iAdmin] & 1, g_iAccountID[iAdmin] / 2, g_sClientIP[iAdmin], iClient, g_iAccountID[iClient] & 1, g_iAccountID[iClient] / 2, g_sClientIP[iClient], sReason);
-		
-		WarnSystem_OnClientUnWarn(iAdmin, iClient, iScore, sReason);
-	} else
-		WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_NotWarned", iClient);
-}*/
-
 //----------------------------------------------------RESET WARNS---------------------------------------------------
 
 public void ResetPlayerWarns(int iAdmin, int iClient, char sReason[129])
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientResetWarnsPre(iAdmin, iClient, sReason) == Plugin_Continue)
 	{
-		/*if (iAdmin == iClient)
+		if (iAdmin == iClient)
 		{
 			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}*/
+		}
 		char dbQuery[513];
 		FormatEx(dbQuery, sizeof(dbQuery),  g_sSQL_SelectWarns, g_iAccountID[iClient], g_iServerID);
 		

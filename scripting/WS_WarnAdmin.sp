@@ -29,13 +29,10 @@ public Plugin myinfo =
 }
 
 bool        g_bDeletedAdmin[MAXPLAYERS+1], g_bUseSB = true;
-//int         g_iType;
 Database    g_hDatabase;
-//ConVar      g_cType;
+
 #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
-Handle      g_hDeletedAdmin;
-//int         g_iScore[MAXPLAYERS+1];
-            
+Handle      g_hDeletedAdmin;          
 #endif
 
 public void OnPluginStart()
@@ -54,15 +51,7 @@ public void OnPluginStart()
     LoopCookiesPlayers(iClient)
         OnClientCookiesCached(iClient);
     #endif
-
-    /*g_cType = CreateConVar("sm_warns_admin_type", "2", "Работа всей системы: (0 - по колличеству предупреждений, 1 - система баллов, 2 - оба варианта.", _, true, 0.0, true, 2.0);
-    g_cType.AddChangeHook(OnTypeChange);
-    AutoExecConfig(true, "module_admin", "warnsystem");*/
 }
-
-/*public void OnConfigsExecuted() { g_iType = g_cType.IntValue; }
-
-public void OnTypeChange(ConVar hCvar, const char[] oldValue, const char[] newValue) { g_iType = hCvar.IntValue; }*/
 
 #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
 public void OnClientCookiesCached(int iClient)
@@ -103,8 +92,6 @@ public int SBGetDatabase(Handle owner, Handle hndl, const char[] error, any data
 public void OnClientPutInServer(int iClient)
 {
     CreateTimer(5.0, OnTimerDead, iClient);
-    /*if(IsValidClient(iClient) && g_bDeletedAdmin[iClient] && GetUserFlagBits(iClient) & (ADMFLAG_GENERIC | ADMFLAG_ROOT))
-        SetUserAdmin(iClient, INVALID_ADMIN_ID);*/
 }
 
 public Action OnTimerDead(Handle Timer, int iClient)
@@ -120,9 +107,9 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
         iMaxScore = WarnSystem_GetMaxScore();
     int iScoreClient = WarnSystem_GetPlayerInfo(iClient, 2), 
         iWarns = WarnSystem_GetPlayerInfo(iClient, 1);
-    /*#if defined _materialadmin_included
+    #if defined _materialadmin_included
     g_hDatabase = MAGetDatabase();
-    #endif*/
+    #endif
     #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
     g_bUseSB = false;
     #endif
