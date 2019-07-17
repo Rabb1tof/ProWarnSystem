@@ -1,7 +1,7 @@
 //---------------------------------DEFINES && INCLUDES--------------------------------
 #pragma semicolon 1
 
-#define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
+#define PLUGIN_NAME         "[WarnSystem] Core Pro"
 #define PLUGIN_AUTHOR       "Rabb1t & vadrozh"
 #define PLUGIN_VERSION      "1.6"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
