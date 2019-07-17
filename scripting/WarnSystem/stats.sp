@@ -15,12 +15,13 @@ public int SteamWorks_SteamServersConnected()
         SteamWorks_SetHTTPRequestRawPostBody(hndl, "application/x-www-form-urlencoded", cBuffer, sizeof(cBuffer));
         SteamWorks_SetHTTPCallbacks(hndl, SteamWorks_OnTransferComplete);
         SteamWorks_SendHTTPRequest(hndl);
-        delete hndl;
+        //delete hndl;
     }
 }
 
 public int SteamWorks_OnTransferComplete(Handle hRequest, bool bFailure, bool bRequestSuccessful, EHTTPStatusCode eStatusCode) {
-    delete hRequest;
+    if(hRequest != INVALID_HANDLE)
+        delete hRequest;
     switch(eStatusCode) {
         case k_EHTTPStatusCode200OK:                    LogAction(-1, -1, "[WarnSystem] Server successfully added/refreshed");
         case k_EHTTPStatusCode400BadRequest:            LogWarnings("[WarnSystem] Bad request");

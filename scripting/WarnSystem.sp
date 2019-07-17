@@ -1,10 +1,10 @@
-//---------------------------------DEFINES--------------------------------
+//---------------------------------DEFINES && INCLUDES--------------------------------
 #pragma semicolon 1
 
-#define PLUGIN_NAME         "[WarnSystem] Core Pro [DEV]"
-#define PLUGIN_AUTHOR       "vadrozh, Rabb1t"
-#define PLUGIN_VERSION      "1.5-pro"
-#define PLUGIN_DESCRIPTION  "Warn players when they're doing something wrong"
+#define PLUGIN_NAME         "[WarnSystem] Core Pro"
+#define PLUGIN_AUTHOR       "Rabb1t & vadrozh"
+#define PLUGIN_VERSION      "1.6"
+#define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
 #define PLUGIN_BUILDDATE    __DATE__ ... " " ... __TIME__
@@ -13,16 +13,20 @@
 //#include <colors>
 #include <csgo_colors>
 #include <morecolors>
+#include <SteamWorks>
 #include <sdktools_sound>
+#include <sourcemod>
 #include <sdktools_stringtables>
 #include <sdktools_functions>
 #include <dbi>
 #undef REQUIRE_PLUGIN
 #undef REQUIRE_EXTENSIONS
 #tryinclude <adminmenu>
-#include <SteamWorks>
+#tryinclude <vip_core>
 #define REQUIRE_PLUGINS
 #define REQUIRE_EXTENSIONS
+
+#pragma newdecls required
 
 //----------------------------------------------------------------------------
 
@@ -33,22 +37,17 @@ ArrayList g_aWarn, g_aUnwarn, g_aResetWarn;
 
 Database g_hDatabase;
 
-int g_iWarnings[MAXPLAYERS+1], g_iPrintToAdminsOverride, g_iUserID[MAXPLAYERS+1], g_iPort, g_iScore[MAXPLAYERS+1];
+int g_iWarnings[MAXPLAYERS+1], /*(g_iPrintToAdminsOverride,*/ g_iUserID[MAXPLAYERS+1], g_iPort, g_iScore[MAXPLAYERS+1], g_iCustom[MAXPLAYERS+1];
 
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
 #include "WarnSystem/stats.sp"
-
-#pragma newdecls required
-
-
-
 #include "WarnSystem/convars.sp"
 #include "WarnSystem/api.sp"
 #include "WarnSystem/database.sp"
 #include "WarnSystem/commands.sp"
-#include "WarnSystem/configs.sp"
+#include "WarnSystem/configs.sp" 
 #include "WarnSystem/menus.sp"
 #include "WarnSystem/func.sp"
 
@@ -69,9 +68,18 @@ public void OnPluginStart()
 	LoadTranslations("core.phrases");
 	LoadTranslations("warnsystem.phrases");
 	
-	switch (GetEngineVersion()) {case Engine_CSGO, Engine_Left4Dead, Engine_Left4Dead2: g_bIsFuckingGame = true;}
-	if(!DirExists("logs/WarnSystem"))
-		CreateDirectory("logs/WarnSystem", 511);
+	switch (GetEngineVersion())
+	{ 
+		case Engine_CSGO: 		g_bIsFuckingGame = true;
+	 	case Engine_Left4Dead:  g_bIsFuckingGame = true;
+		case Engine_Left4Dead2: g_bIsFuckingGame = true; 
+	}
+	if(!DirExists("addons/sourcemod/logs/WarnSystem"))
+		CreateDirectory("addons/sourcemod/logs/WarnSystem", 511);
+	if(!FileExists("logs/WarnSystem/WarnSystem.log"))
+		OpenFile("logs/WarnSystem/WarnSystem.log", "w");
+	if(!FileExists("logs/WarnSystem/WarnSystem_Query.log"))
+		OpenFile("logs/WarnSystem/WarnSystem_Query.log", "w");
 	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
 	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
 	
@@ -96,8 +104,8 @@ public void OnPluginStart()
 	strcopy(g_sClientIP[0], 65, "localhost");
 	g_iAccountID[0] = -1;
 	
-	if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
-		g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
+	//if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
+		//g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
 }
 
 public void OnLibraryAdded(const char[] sName)
@@ -112,6 +120,31 @@ public void OnLibraryRemoved(const char[] sName)
 {
 	if (StrEqual(sName, "adminmenu"))
 		g_hAdminMenu = INVALID_HANDLE;
+}
+
+public Action OnClientSayCommand(int iClient, const char[] szCommand, const char[] szArgs)
+{
+	if(g_iCustom[iClient] == 0)		return Plugin_Continue;
+
+	char szReason[129];
+	strcopy(szReason, sizeof(szReason), szArgs);
+	//GetCmdArgString(szReason, sizeof(szReason));
+	StripQuotes(szReason);
+	if (StrEqual(szReason[0], "!stop") || StrEqual(szReason[0], "!cancel") || StrEqual(szReason[0], "!s") || StrEqual(szReason[0], "!c"))
+	{
+		WS_PrintToChat(iClient, "%t", "WS_Reason_Aborted");
+		return Plugin_Handled;
+	}
+
+	switch(g_iCustom[iClient])		
+	{
+		case 1: 	WarnPlayer(iClient, g_iTarget[iClient], g_iScoreLength, g_iWarnLength, szReason); // issue a warning	
+		case 2:		FindWarn(iClient, g_iDataID[iClient], szReason);
+		case 3:		ResetPlayerWarns(iClient, g_iTarget[iClient], szReason);
+		//return Plugin_Handled; // block the reason to be sent in chat
+	}
+	g_iCustom[iClient] = 0;
+	return Plugin_Handled;
 }
 
 public void OnMapStart()
