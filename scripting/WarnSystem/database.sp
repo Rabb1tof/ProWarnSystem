@@ -333,10 +333,15 @@ public void SQL_LoadPlayerData(Database hDatabase, DBResultSet hDatabaseResults,
 			}
 		}
 
-		PrintToChatAll("Debug: %b", g_bIsFuckingGame);
+		//PrintToChatAll("Debug: %b", g_bIsFuckingGame);
 	} else {
 		g_iWarnings[iClient] = 0;
 		g_iScore[iClient] = 0;
+	}
+
+	if(g_iScore[iClient] > g_iMaxScore || g_iWarnings[iClient] > g_iMaxWarns)
+	{
+		KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick", "баллов или предупреждений");
 	}
 	
 	WarnSystem_OnClientLoaded(iClient);

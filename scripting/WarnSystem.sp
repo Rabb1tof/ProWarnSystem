@@ -124,7 +124,7 @@ public void OnLibraryRemoved(const char[] sName)
 
 public Action OnClientSayCommand(int iClient, const char[] szCommand, const char[] szArgs)
 {
-	if(g_iCustom[iClient] == 0)		return Plugin_Handled;
+	if(g_iCustom[iClient] == 0)		return Plugin_Continue;
 
 	char szReason[129];
 	strcopy(szReason, sizeof(szReason), szArgs);

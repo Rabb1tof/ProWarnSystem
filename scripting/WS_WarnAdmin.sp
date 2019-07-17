@@ -28,12 +28,14 @@ public Plugin myinfo =
     
 }
 
-bool        g_bDeletedAdmin[MAXPLAYERS+1];
+bool        g_bDeletedAdmin[MAXPLAYERS+1], g_bUseSB = true;
 //int         g_iType;
 Database    g_hDatabase;
 //ConVar      g_cType;
 #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
 Handle      g_hDeletedAdmin;
+//int         g_iScore[MAXPLAYERS+1];
+            
 #endif
 
 public void OnPluginStart()
@@ -67,14 +69,13 @@ public void OnClientCookiesCached(int iClient)
 {
     char szDummyData[16];
     GetClientCookie(iClient, g_hDeletedAdmin, szDummyData, sizeof(szDummyData));
-    g_bDeletedAdmin[iClient] = UTIL_StringToInt(szDummyData);
+    g_bDeletedAdmin[iClient] = view_as<bool>(UTIL_StringToInt(szDummyData));
 }
 
 public void OnClientDisconnect(int iClient) {
     char szDummyData[16];
-    IntToString(g_iScore[iClient], szDummyData, sizeof(szDummyData));
+    IntToString(g_bDeletedAdmin[iClient], szDummyData, sizeof(szDummyData));
     SetClientCookie(iClient, g_hDeletedAdmin, szDummyData);
-
 }
 
 int UTIL_StringToInt(const char[] szString) {
@@ -101,23 +102,15 @@ public int SBGetDatabase(Handle owner, Handle hndl, const char[] error, any data
 
 public void OnClientPutInServer(int iClient)
 {
-    if(IsValidClient(iClient) && g_bDeletedAdmin[iClient] && GetUserFlagBits(iClient) & (ADMFLAG_GENERIC | ADMFLAG_ROOT))
-        DeleteAdminAccess(iClient);
-
+    CreateTimer(5.0, OnTimerDead, iClient);
+    /*if(IsValidClient(iClient) && g_bDeletedAdmin[iClient] && GetUserFlagBits(iClient) & (ADMFLAG_GENERIC | ADMFLAG_ROOT))
+        SetUserAdmin(iClient, INVALID_ADMIN_ID);*/
 }
 
-stock void DeleteAdminAccess(int iClient)
+public Action OnTimerDead(Handle Timer, int iClient)
 {
-    char szSteamID[64];
-    AdminId aAdmin[2]; 
-    FormatEx(szSteamID, sizeof(szSteamID), "STEAM_1:%i:%i");
-    aAdmin[0] = FindAdminByIdentity("steam", szSteamID);
-    FormatEx(szSteamID, sizeof(szSteamID), "STEAM_0:%i:%i");
-    aAdmin[1] = FindAdminByIdentity("steam", szSteamID);
-    if(aAdmin[0] != INVALID_ADMIN_ID) 
-        RemoveAdmin(aAdmin[0]);
-    else if(aAdmin[1] != INVALID_ADMIN_ID)
-        RemoveAdmin(aAdmin[1]);
+    if(IsValidClient(iClient) && g_bDeletedAdmin[iClient] && GetUserFlagBits(iClient) & (ADMFLAG_GENERIC | ADMFLAG_ROOT))
+        SetUserAdmin(iClient, INVALID_ADMIN_ID);
 }
 
 public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTime, char sReason[129], bool bIsAdmin)
@@ -130,20 +123,27 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
     /*#if defined _materialadmin_included
     g_hDatabase = MAGetDatabase();
     #endif*/
-    if(g_hDatabase != INVALID_HANDLE && GetUserFlagBits(iClient))
+    #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
+    g_bUseSB = false;
+    #endif
+    if((g_hDatabase != INVALID_HANDLE && GetUserFlagBits(iClient)) || !g_bUseSB)
     {
         #if defined _sourcebans_included && defined _sourcebanspp_included && defined _materialadmin_included
         char szBuffer[525];
         int iAccountIDA = GetSteamAccountID(iAdmin), iAccountIDC = GetSteamAccountID(iClient);
         #endif
+        //SetUserAdmin(iClient, INVALID_ADMIN_ID);
         if(iMaxScore < iScoreClient || iMaxWarn < iWarns)
         {
             #if defined _sourcebans_included && defined _sourcebanspp_included && defined _materialadmin_included
             FormatEx(szBuffer, sizeof(szBuffer), "UPDATE `sb_admins` SET 'expired' = UNIX_TIMESTAMP() WHERE `authid` IN('STEAM_0:%i:%i', STEAM_1:%i:%i, '%i+76561197960265728')", iAccountIDC & 1, iAccountIDC / 2, 
                 iAccountIDC & 1, iAccountIDC / 2, iAccountIDC);
             #endif
-            DeleteAdminAccess(iClient);
+            SetUserAdmin(iClient, INVALID_ADMIN_ID);
+            #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
             g_bDeletedAdmin[iClient] = true;
+            OnClientDisconnect(iClient);
+            #endif
         }
         #if defined _sourcebans_included && defined _sourcebanspp_included && defined _materialadmin_included
         else
