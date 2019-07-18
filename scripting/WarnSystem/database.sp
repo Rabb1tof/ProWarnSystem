@@ -6,30 +6,30 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 		`warns` INTEGER(10) NOT NULL DEFAULT '0', \
 		`score` INTEGER NOT NULL DEFAULT '0');",
 	g_sSQL_CreateTablePlayers_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_player` (\
-  `account_id` int(10) unsigned NOT NULL COMMENT 'Steam Account ID',\
-  `username` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unnamed',\
-  `warns` int(10) unsigned NOT NULL DEFAULT '0',\
-  `score` smallint(6) NOT NULL unsigned DEFAULT '0',\
-  PRIMARY KEY (`account_id`)\
+`account_id` int(10) unsigned NOT NULL COMMENT 'Steam Account ID',\
+`username` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unnamed',\
+`warns` int(10) unsigned NOT NULL DEFAULT '0',\
+`score` smallint(6) unsigned NOT NULL DEFAULT '0',\
+PRIMARY KEY (`account_id`)\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Перечень всех игроков';",
 	g_sSQL_CreateTableWarns_MySQL[] = "CREATE TABLE IF NOT EXISTS `ws_warn` ( \
-  `warn_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор предупреждения',\
-  `admin_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока-администратора, выдавшего предупреждение',\
-  `client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',\
-  `server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',\
-  `reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',\
-  `score` smallint(6) unsigned DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение', \
-  `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
-  `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
-  `deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
-  `isadmin` TINYINT(1) unsigned NOT NULL COMMENT 'Является ли предупрежденный админом (1 - да)',\
-  PRIMARY KEY (`warn_id`),\
-  KEY `FK_ws_warn_ws_server` (`server_id`),\
-  KEY `FK_ws_warn_ws_admin` (`admin_id`),\
-  KEY `FK_ws_warn_ws_client` (`client_id`),\
-  CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\
-  CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\
-  CONSTRAINT `FK_ws_warn_ws_server` FOREIGN KEY (`server_id`) REFERENCES `ws_server` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE\
+`warn_id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор предупреждения',\
+`admin_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока-администратора, выдавшего предупреждение',\
+`client_id` int(10) unsigned NOT NULL COMMENT 'Идентификатор игрока, который получил предупреждение',\
+`server_id` smallint(6) unsigned NOT NULL COMMENT 'Идентификатор сервера',\
+`reason` varchar(256) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Причина',\
+`score` smallint(6) unsigned DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение', \
+`created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
+`expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
+`deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
+`isadmin` TINYINT(1) unsigned NOT NULL COMMENT 'Является ли предупрежденный админом (1 - да)',\
+PRIMARY KEY (`warn_id`),\
+KEY `FK_ws_warn_ws_server` (`server_id`),\
+KEY `FK_ws_warn_ws_admin` (`admin_id`),\
+KEY `FK_ws_warn_ws_client` (`client_id`),\
+CONSTRAINT `FK_ws_warn_ws_admin` FOREIGN KEY (`admin_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\
+CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE,\
+CONSTRAINT `FK_ws_warn_ws_server` FOREIGN KEY (`server_id`) REFERENCES `ws_server` (`server_id`) ON DELETE CASCADE ON UPDATE CASCADE\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Все выданные когда-либо предупреждения';",
 
 	g_sSQL_CreateTableWarns_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_warn` ( \
@@ -47,11 +47,11 @@ char g_sSQL_CreateTablePlayers_SQLite[] = "CREATE TABLE IF NOT EXISTS `ws_player
 	CONSTRAINT `FK_ws_warn_ws_client` FOREIGN KEY (`client_id`) REFERENCES `ws_player` (`account_id`) ON DELETE CASCADE ON UPDATE CASCADE)",
 	
 	g_sSQL_CreateTableServers[] = "CREATE TABLE IF NOT EXISTS `ws_server` (\
-  `server_id` smallint(6) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор сервера',\
-  `address` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0' COMMENT 'IP-адрес сервера',\
-  `port` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Порт сервера',\
-  PRIMARY KEY (`server_id`),\
-  UNIQUE KEY `ws_servers_address_port` (`address`,`port`)\
+`server_id` smallint(6) unsigned NOT NULL AUTO_INCREMENT COMMENT 'Уникальный идентификатор сервера',\
+`address` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0' COMMENT 'IP-адрес сервера',\
+`port` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Порт сервера',\
+PRIMARY KEY (`server_id`),\
+UNIQUE KEY `ws_servers_address_port` (`address`,`port`)\
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Перечень серверов';",
 	g_sSQL_GetServerID[] = "SELECT `server_id` FROM `ws_server` WHERE `address` = '%s' AND `port` = '%i';",
 	g_sSQL_SetServerID[] = "INSERT IGNORE INTO `ws_server` (`address`, `port`) VALUES ('%s', '%i');",
@@ -64,7 +64,7 @@ INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id`\
 WHERE `client_id` = '%i' AND `server_id` = '%i' AND `deleted` = '0';",
 	g_sSQL_FindWarn[] = "SELECT `ws_warn`.`client_id`, `player`.`warns`, `ws_warn`.`score`\
-    FROM `ws_warn`\
+	FROM `ws_warn`\
 INNER JOIN `ws_player` AS `player`\
 WHERE `ws_warn`.`warn_id` = '%i' AND\
 `ws_warn`.`server_id` = '%i'",
@@ -104,10 +104,10 @@ INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id` \
 WHERE `ws_warn`.`warn_id` = '%i';",
 	g_sSQL_UpdateSQLiteW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0',\
-															   `isadmin` TINYINT NOT NULL DEFAULT '0'",
+															`isadmin` TINYINT NOT NULL DEFAULT '0'",
 	g_sSQL_UpdateSQLiteP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0'",
 	g_sSQL_UpdateMySQLW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение.',\
-															  `isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом.'",
+															`isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом.'",
 	g_sSQL_UpdateMySQLP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов у юзера.'",
 	g_sClientIP[MAXPLAYERS+1][65];
 	

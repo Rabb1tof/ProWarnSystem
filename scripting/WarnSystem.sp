@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[WarnSystem] Core Pro"
 #define PLUGIN_AUTHOR       "Rabb1t & vadrozh"
-#define PLUGIN_VERSION      "1.6"
+#define PLUGIN_VERSION      "1.6.1"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -67,7 +67,7 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	LoadTranslations("core.phrases");
 	LoadTranslations("warnsystem.phrases");
-	
+
 	switch (GetEngineVersion())
 	{ 
 		case Engine_CSGO: 		g_bIsFuckingGame = true;
@@ -106,6 +106,12 @@ public void OnPluginStart()
 	
 	//if (!GetCommandOverride("sm_warn", Override_Command, g_iPrintToAdminsOverride))
 		//g_iPrintToAdminsOverride = ADMFLAG_GENERIC;
+}
+
+public Action CmdDB(int iClient, int args)
+{
+	InitializeDatabase();
+	return Plugin_Handled;
 }
 
 public void OnLibraryAdded(const char[] sName)
