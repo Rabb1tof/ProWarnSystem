@@ -103,11 +103,11 @@ INNER JOIN `ws_player` AS `admin` \
 INNER JOIN `ws_player` AS `player` \
 	ON `ws_warn`.`client_id` = `player`.`account_id` \
 WHERE `ws_warn`.`warn_id` = '%i';",
-	g_sSQL_UpdateSQLiteW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0',\
-															`isadmin` TINYINT NOT NULL DEFAULT '0'",
+	g_sSQL_UpdateSQLiteW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0';\
+							ALTER TABLE `ws_warn` ADD COLUMN `isadmin` TINYINT NOT NULL DEFAULT '0';",
 	g_sSQL_UpdateSQLiteP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` INTEGER NOT NULL DEFAULT '0'",
 	g_sSQL_UpdateMySQLW[] = "ALTER TABLE `ws_warn` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение.',\
-															`isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом.'",
+							ALTER TABLE `ws_warn` ADD COLUMN `isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом.'",
 	g_sSQL_UpdateMySQLP[] = "ALTER TABLE `ws_player` ADD COLUMN `score` smallint(6) unsigned NOT NULL DEFAULT '0' COMMENT 'Количество баллов у юзера.'",
 	g_sClientIP[MAXPLAYERS+1][65];
 	
