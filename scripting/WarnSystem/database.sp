@@ -21,8 +21,8 @@ PRIMARY KEY (`account_id`)\
 `score` smallint(6) unsigned DEFAULT '0' COMMENT 'Количество баллов за выданное предупреждение', \
 `created_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда был создан',\
 `expires_at` int(10) unsigned NOT NULL COMMENT 'TIMESTAMP, когда истекает, или 0, если бессрочно',\
-`deleted` TINYINT(1) unsigned NOT NULL COMMENT 'Истекло ли предупреждение 1 - да',\
-`isadmin` TINYINT(1) unsigned NOT NULL COMMENT 'Является ли предупрежденный админом (1 - да)',\
+`deleted` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Истекло ли предупреждение 1 - да',\
+`isadmin` TINYINT(1) unsigned NOT NULL DEFAULT '0' COMMENT 'Является ли предупрежденный админом (1 - да)',\
 PRIMARY KEY (`warn_id`),\
 KEY `FK_ws_warn_ws_server` (`server_id`),\
 KEY `FK_ws_warn_ws_admin` (`admin_id`),\
@@ -180,8 +180,7 @@ public void SQL_TransactionFailed(Database hDatabase, any data, int iNumQueries,
 		case 3:     szQuery = "Unwarn Player";
 	}
 	FormatEx(szBuffer, sizeof(szBuffer), "Query: %s, %i index: %s", szQuery, iFailIndex, szError);
-	if(g_bLogQuery)
-		LogQuery(szBuffer);
+	LogWarnings(szBuffer);
 }
 
 public void GetServerID()
@@ -392,11 +391,11 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientWarnPre(iAdmin, iClient, iTime, iScore, sReason) == Plugin_Continue)
 	{
-		if (iAdmin == iClient)
+		/*if (iAdmin == iClient)
 		{
 			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}
+		}*/
 		char sEscapedAdminName[257], sEscapedClientName[257], sEscapedReason[259], 
 				dbQuery[513], TempNick[128];
 		int iCurrentTime = GetTime();
@@ -502,11 +501,11 @@ public void FindWarn(int iAdmin, int iId, char sReason[129])
 
 public void SQL_FindWarn(Database hDatabase, DBResultSet hDatabaseResults, const char[] sError, DataPack dPack)
 {
-	if (hDatabaseResults == INVALID_HANDLE || sError[0])
+	/*if (hDatabaseResults == INVALID_HANDLE || sError[0])
 	{
 		LogWarnings("[WarnSystem] SQL_FindWarn - error while working with data (%s)", sError);
 		return;
-	}
+	}*/
 
 	int iAdmin, iClient, iId, iScore;
 	char sReason[129];
@@ -541,11 +540,11 @@ public void UnwarnPlayer(int iAdmin, int iClient, int iId, int iScore, char sRea
 {
 	if (IsValidClient(iClient) && -1<iAdmin && iAdmin<=MaxClients && WarnSystem_OnClientUnWarnPre(iAdmin, iClient, iId, iScore, sReason) == Plugin_Continue)
 	{
-		if (iAdmin == iClient)
+		/*if (iAdmin == iClient)
 		{
 			WS_PrintToChat(iAdmin, " %t %t", "WS_ColoredPrefix", "WS_CantTargetYourself");
 			return;
-		}
+		}*/
 		
 		char dbQuery[513];
 

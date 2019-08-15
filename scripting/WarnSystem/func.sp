@@ -92,7 +92,7 @@ stock bool CheckAdminFlagsByString(int iClient, const char[] szFlagString)
 stock int FindClientByAccountID(int iAccountID)
 {
 	int iTargetAccountID;
-	for(int i = 1; i < MaxClients; i++)
+	for(int i = 1; i < MaxClients; i++) if(IsValidClient(i))
 	{
 		iTargetAccountID = GetSteamAccountID(i);
 		if(iAccountID == iTargetAccountID)
