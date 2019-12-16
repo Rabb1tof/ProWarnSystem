@@ -107,9 +107,6 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
         iMaxScore = WarnSystem_GetMaxScore();
     int iScoreClient = WarnSystem_GetPlayerInfo(iClient, 2), 
         iWarns = WarnSystem_GetPlayerInfo(iClient, 1);
-    #if defined _materialadmin_included
-    g_hDatabase = MAGetDatabase();
-    #endif
     #if !defined _sourcebans_included && !defined _sourcebanspp_included && !defined _materialadmin_included
     g_bUseSB = false;
     #endif

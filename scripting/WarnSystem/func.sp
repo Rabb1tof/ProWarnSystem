@@ -5,10 +5,7 @@ stock void PrintToAdmins(char[] sFormat, any ...)
 	char sBuffer[255];
 	for (int i = 1; i<=MaxClients; ++i)
 		if (IsValidClient(i) && (GetUserFlagBits(i) & ADMFLAG_GENERIC))
-		{	
-			VFormat(sBuffer, sizeof(sBuffer), sFormat, 2);
 			WS_PrintToChat(i, "%s", sBuffer);
-		}
 }
 
 stock void WS_PrintToChat(int iClient, const char[] szFormat, any ...)

@@ -6,7 +6,7 @@
 #pragma newdecls required
 #pragma semicolon 1
 
-#define VERS_PLUGIN "1.1"
+#define VERS_PLUGIN "1.2"
 
 public Plugin myinfo =
 {
@@ -30,8 +30,8 @@ public void OnPluginStart()
 
 public void VIP_OnVIPLoaded() 
 {
-    for(int i; i < 3; i++)
-        VIP_RegisterFeature(g_szFeatureName[i], INT, SELECTABLE, VIP_OnItemSelected, _, VIP_OnItemDraw);
+    for(int i; i < 3; ++i)
+        VIP_RegisterFeature(g_szFeatureName[i], INT, SELECTABLE, VIP_OnItemSelected);
 }
 
 public int VIP_OnItemDraw(int iClient, const char[] szFeatureName, int iStyle) 
@@ -46,22 +46,19 @@ public bool VIP_OnItemSelected(int iClient, const char[] szFeatureName)
     {
         Menu hMenu = new Menu(SelectPlayer_Warn);
         AddTargets(iClient, hMenu);
-        //hMenu.Display(iClient, 0);
-        return true;
+        hMenu.Display(iClient, 0);
     }
     else if(StrEqual(szFeatureName, g_szFeatureName[1]))
     {
         Menu hMenu = new Menu(SelectPlayer_Unwarn);
         AddTargets(iClient, hMenu);
-        //hMenu.Display(iClient, 0);
-        return true;
+        hMenu.Display(iClient, 0);
     }
     else if(StrEqual(szFeatureName, g_szFeatureName[2]))
     {
         Menu hMenu = new Menu(SelectPlayer_Resetwarn);
         AddTargets(iClient, hMenu);
-        //hMenu.Display(iClient, 0);
-        return true;
+        hMenu.Display(iClient, 0);
     }
 
     return false;
@@ -83,6 +80,7 @@ public int SelectPlayer_Warn(Menu hMenu, MenuAction eAction, int iAdmin, int iIt
                 return;
             }
 
+            //WarnSystem_Warn(iAdmin, iClient, 10, 86400, "Нарушение правил");
             WarnSystem_Warn(iAdmin, iClient, "Нарушение правил");
         }
     }
@@ -134,9 +132,11 @@ public int SelectPlayer_Resetwarn(Menu hMenu, MenuAction eAction, int iAdmin, in
 void AddTargets(int iClient, Menu hMenu)
 {
     SetMenuTitle(hMenu, "Выберите игрока:\n ");
-    AddTargetsToMenu2(hMenu, 0, COMMAND_FILTER_CONNECTED|COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_NO_BOTS);
+    AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_CONNECTED|COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_NO_BOTS);
+    if(hMenu.ItemCount == 0)
+        hMenu.AddItem(NULL_STRING, "Нет доступных игроков!", ITEMDRAW_DISABLED);
 
-    hMenu.Display(iClient, 0);
+    //hMenu.Display(iClient, 0);
     //PrintToChatAll("Debug");
 }
 

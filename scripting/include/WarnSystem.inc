@@ -174,7 +174,7 @@ forward void WarnSystem_OnClientResetWarns(int iClient, int iTarget, char sReaso
 * @param sReason		The reason why he reset warns
 * @noreturn	
 *********************************************************/
-forward Action WarnSystem_OnClientResetWarnsPre(int iClient, int iTarget, char sReason[129])
+forward Action WarnSystem_OnClientResetWarnsPre(int iClient, int iTarget, char sReason[129]);
 
 /*********************************************************
 * Calling on warn to punish player
