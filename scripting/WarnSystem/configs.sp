@@ -15,7 +15,7 @@ void InitializeConfig()
 	bool bResult =	UTIL_ParseConfig("WarnReasons.cfg", OnKV_WReasons, OnNewSection, OnLS_WReasons) &&
 					UTIL_ParseConfig("UnwarnReasons.cfg", OnKV_UReasons, OnNewSection, OnLS_UReasons) &&
 					UTIL_ParseConfig("ResetWarnReasons.cfg", OnKV_RReasons, OnNewSection, OnLS_RReasons);
-	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/WarnSystem/WarnAgreement.cfg");
+	BuildPath(Path_SM, g_sPathAgreePanel, sizeof(g_sPathAgreePanel), "configs/warnsystem/WarnAgreement.cfg");
 					//UTIL_ParseConfig("WarnAgreement.cfg", OnKV_Agreement, OnNewSection, OnEndSection);
 
 	if (!bResult)
@@ -30,7 +30,7 @@ bool UTIL_ParseConfig(const char[] szFileName,
     SMC_EndSection fnOnLS)
 {
 	char szPath[PLATFORM_MAX_PATH];
-	BuildPath(Path_SM, szPath, sizeof(szPath), "configs/WarnSystem/%s", szFileName);
+	BuildPath(Path_SM, szPath, sizeof(szPath), "configs/warnsystem/%s", szFileName);
 
 	if (!FileExists(szPath))
 		return false;
