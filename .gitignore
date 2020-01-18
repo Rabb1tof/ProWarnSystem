@@ -8,5 +8,6 @@
 !/scripting/warns_vip.sp
 !/scripting/WS_WarnAdmin.sp
 !/scripting/discord_ws.sp
+!/scripting/WS_*
 *.exe
 *.dat
