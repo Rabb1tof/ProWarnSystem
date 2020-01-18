@@ -41,7 +41,7 @@ public void OnSbTypeChanged(ConVar hCV, const char[] oldValue, const char[] newV
 public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
 	switch(g_iSbType){
-		case 0:     SourceBans_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
+		case 0:     SBBanPlayer(iAdmin, iClient, iBanLenght, sReason);
 		case 1:     SBPP_BanPlayer(iAdmin, iClient, iBanLenght, sReason);
 		case 2:     MABanPlayer(iAdmin, iClient, MA_BAN_STEAM, iBanLenght, sReason);
 	}

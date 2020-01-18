@@ -1,9 +1,9 @@
 //---------------------------------DEFINES && INCLUDES--------------------------------
 #pragma semicolon 1
 
-#define PLUGIN_NAME         "[WarnSystem] Core Pro"
+#define PLUGIN_NAME         "[warnsystem] Core Pro"
 #define PLUGIN_AUTHOR       "Rabb1t & vadrozh"
-#define PLUGIN_VERSION      "1.6.2"
+#define PLUGIN_VERSION      "1.6.3"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -42,14 +42,14 @@ int g_iWarnings[MAXPLAYERS+1], /*(g_iPrintToAdminsOverride,*/ g_iUserID[MAXPLAYE
 #define LogWarnings(%0) LogToFileEx(g_sLogPath, %0)
 #define LogQuery(%0)    LogToFileEx(g_szQueryPath, %0)
 
-#include "WarnSystem/stats.sp"
-#include "WarnSystem/convars.sp"
-#include "WarnSystem/api.sp"
-#include "WarnSystem/database.sp"
-#include "WarnSystem/commands.sp"
-#include "WarnSystem/configs.sp" 
-#include "WarnSystem/menus.sp"
-#include "WarnSystem/func.sp"
+#include "warnsystem/stats.sp"
+#include "warnsystem/convars.sp"
+#include "warnsystem/api.sp"
+#include "warnsystem/database.sp"
+#include "warnsystem/commands.sp"
+#include "warnsystem/configs.sp" 
+#include "warnsystem/menus.sp"
+#include "warnsystem/func.sp"
 
 public Plugin myinfo =
 {
@@ -74,14 +74,14 @@ public void OnPluginStart()
 	 	case Engine_Left4Dead:  g_bIsFuckingGame = true;
 		case Engine_Left4Dead2: g_bIsFuckingGame = true; 
 	}
-	if(!DirExists("addons/sourcemod/logs/WarnSystem"))
-		CreateDirectory("addons/sourcemod/logs/WarnSystem", 511);
-	if(!FileExists("logs/WarnSystem/WarnSystem.log"))
-		OpenFile("logs/WarnSystem/WarnSystem.log", "w");
-	if(!FileExists("logs/WarnSystem/WarnSystem_Query.log"))
-		OpenFile("logs/WarnSystem/WarnSystem_Query.log", "w");
-	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/WarnSystem/WarnSystem.log");
-	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/WarnSystem/WarnSystem_Query.log");
+	if(!DirExists("addons/sourcemod/logs/warnsystem"))
+		CreateDirectory("addons/sourcemod/logs/warnsystem", 511);
+	if(!FileExists("addons/sourcemod/logs/warnsystem/warnsystem.log"))
+		OpenFile("addons/sourcemod/logs/warnsystem/warnsystem.log", "w");
+	if(!FileExists("addons/sourcemod/logs/warnsystem/WarnSystem_Query.log"))
+		OpenFile("addons/sourcemod/logs/warnsystem/WarnSystem_Query.log", "w");
+	BuildPath(Path_SM, g_sLogPath, sizeof(g_sLogPath), "logs/warnsystem/warnsystem.log");
+	BuildPath(Path_SM, g_szQueryPath, sizeof(g_szQueryPath), "logs/warnsystem/WarnSystem_Query.log");
 	
 	InitializeConVars();
 	InitializeDatabase();
@@ -200,21 +200,21 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129], b
 		switch (g_iMaxPunishment)
 		{
 			case 1:
-				KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
+				KickClient(iClient, "[warnsystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
 			case 2:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
-				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
+				FormatEx(sBanReason, sizeof(sBanReason), "[warnsystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
+				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "warnsystem");
 			}
 			case 3:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
+				FormatEx(sBanReason, sizeof(sBanReason), "[warnsystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
 				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected max punishment with custom module but module doesn't exists.  Client kicked.");
-					KickClient(iClient, "[WarnSystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
+					KickClient(iClient, "[warnsystem] %t", "WS_MaxKick", bType ? "баллов" : "предупреждений");
 				}
 			}
 		}
@@ -244,19 +244,19 @@ public void PunishPlayer(int iAdmin, int iClient, int iScore, int iTime, char sR
 			case 5:
 			{
 				char sKickReason[129];
-				FormatEx(sKickReason, sizeof(sKickReason), "[WarnSystem] %t", "WS_PunishKick", sReason);
+				FormatEx(sKickReason, sizeof(sKickReason), "[warnsystem] %t", "WS_PunishKick", sReason);
 				KickClient(iClient, sKickReason);
 			}
 			case 6:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
-				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "WarnSystem");
+				FormatEx(sBanReason, sizeof(sBanReason), "[warnsystem] %t", "WS_PunishBan", sReason);
+				BanClient(iClient, g_iBanLenght, BANFLAG_AUTO, sBanReason, sBanReason, "warnsystem");
 			}
 			case 7:
 			{
 				char sBanReason[129];
-				FormatEx(sBanReason, sizeof(sBanReason), "[WarnSystem] %t", "WS_PunishBan", sReason);
+				FormatEx(sBanReason, sizeof(sBanReason), "[warnsystem] %t", "WS_PunishBan", sReason);
 				if (WarnSystem_WarnPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
 				{
 					LogWarnings("Selected punishment with custom module but module doesn't exists.");
