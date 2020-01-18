@@ -26,7 +26,7 @@ public Plugin myinfo =
     name = "[WarnSystem] Punish",
     author = "vadrozh, Rabb1t",
     description = "Module adds support of sb (all)",
-    version = "2.0.0",
+    version = "2.0.4",
     url = "hlmod.ru"
 }
 
@@ -149,13 +149,15 @@ void GetTimePunish(int iClient)
     Menu hMenu = new Menu(OnTimeGetted);
     hMenu.SetTitle("Выберите время:");
 
-    if (kv.ImportFromFile(path)) 
+    if (FileToKeyValues(kv, path)) 
 	{
         //kv.Rewind();
-        if (kv.JumpToKey("time"))
+        if (kv.JumpToKey("time", false))
         {
-            if(kv.GotoFirstSubKey())
+            PrintToServer("Key exist");
+            if(kv.GotoFirstSubKey(false))
             {
+                PrintToServer("First subkey is exist");
                 char buffer[64], info[20];
                 int time;
                 do {
@@ -163,8 +165,12 @@ void GetTimePunish(int iClient)
                     time = kv.GetNum(buffer);
                     IntToString(time, info, sizeof(info));
                     hMenu.AddItem(info, buffer);
-                } while (kv.GotoNextKey());
+                    PrintToServer("Item added");
+                    //KvGoBack(kv);
+                } while (kv.GotoNextKey(false));
+                //KvGoBack(kv);
             }
+            //KvGoBack(kv);
         }
         else SetFailState("Key 'time' not found!");
         kv.Close();
