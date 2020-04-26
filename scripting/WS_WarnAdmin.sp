@@ -20,7 +20,7 @@
 
 public Plugin myinfo =
 {
-    author = "Rabb1t (Discord: Rabb1t#2017)",
+    author = "Rabb1t (Discord: Rabb1t#4578)",
     name = "[WarnSystem] Warning Admin (MA & SB support)",
     version = VERS_PLUGIN,
     description = "",

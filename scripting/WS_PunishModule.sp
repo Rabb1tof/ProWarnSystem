@@ -4,6 +4,7 @@
 #include <adminmenu>
 #include <basecomm>
 #include <csgo_colors>
+#include <sdktools_functions>
 
 #undef REQUIRE_PLUGIN
 #tryinclude <sourcebans>
@@ -18,7 +19,7 @@
 #pragma newdecls required
 
 ConVar g_cSbType, g_cUseSb, g_cDefaultPunish;
-int g_iSbType, g_iDefaultPunish, g_iAdmin, g_iTarget, g_iTimePunish, g_iTypePunish;
+int g_iSbType, g_iDefaultPunish, /*g_iAdmin, g_iTarget,*/ g_iTimePunish, g_iTypePunish;
 bool g_bUseSb;
 
 public Plugin myinfo =
@@ -26,7 +27,7 @@ public Plugin myinfo =
     name = "[WarnSystem] Punish",
     author = "vadrozh, Rabb1t",
     description = "Module adds support of sb (all)",
-    version = "2.0.4",
+    version = "2.1",
     url = "hlmod.ru"
 }
 
@@ -54,19 +55,23 @@ public void OnSbTypeChanged(ConVar hCV, const char[] oldValue, const char[] newV
 public void OnStatusSbChanged(ConVar hCV, const char[] oldValue, const char[] newValue) { g_bUseSb = hCV.BoolValue; }
 public void OnDefaultPunishChanged(ConVar hCV, const char[] oldValue, const char[] newValue) { g_iDefaultPunish = hCV.IntValue; }
 
-public Action WarnSystem_WarnPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
+public Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght, char sReason[129])
 {
+    // TODO: удалять к хуям добавление игроков меню.
+    
     g_iTimePunish = iBanLenght;
-    Menu hMenu = new Menu(OnPlayerPunished);
+    /*Menu hMenu = new Menu(OnPlayerPunished);
     hMenu.SetTitle("Выберите наказание для игрока:");
     AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_CONNECTED);
 
-    hMenu.Display(iClient, TIME);
+    hMenu.Display(iClient, TIME);*/
+
+    GetPunish(iClient, iTarget);
 
     return Plugin_Handled;
 }
 
-public int OnPlayerPunished(Menu hMenu, MenuAction action, int iClient, int iTarget)
+/*public int OnPlayerPunished(Menu hMenu, MenuAction action, int iClient, int iTarget)
 {
     switch(action)
     {
@@ -80,7 +85,7 @@ public int OnPlayerPunished(Menu hMenu, MenuAction action, int iClient, int iTar
             GetPunish(iClient);
         }
     }
-}
+}*/
 
 public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLenght, char sReason[129])
 {
@@ -94,16 +99,19 @@ public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLeng
     }*/
 
     g_iTimePunish = iBanLenght;
-    Menu hMenu = new Menu(OnPlayerPunished);
+    /*Menu hMenu = new Menu(OnPlayerPunished);
     hMenu.SetTitle("Выберите наказание для игрока:");
     AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_CONNECTED);
 
-    hMenu.Display(iClient, TIME);
+    hMenu.Display(iClient, TIME);*/
+
+    GetPunish(iAdmin, iClient);
+    //PrintToChatAll("TEST#1");
 
     return Plugin_Handled;
 }
 
-void GetPunish(int iClient) /* this function helpeful get punish for a target */
+void GetPunish(int iClient, int iTarget) /* this function helpeful get punish for a target */
 {
     Menu hMenu = new Menu(OnPunishGetted);
     hMenu.SetTitle("Выберите тип наказания:");
@@ -112,12 +120,24 @@ void GetPunish(int iClient) /* this function helpeful get punish for a target */
     hMenu.AddItem(NULL_STRING, "Гаг"); // gag
     hMenu.AddItem(NULL_STRING, "Мут+гаг"); // mute + gag
     hMenu.AddItem(NULL_STRING, "Кик"); // 4 - kick
+    hMenu.AddItem(NULL_STRING, "Убить"); // 5 - slay
+
+    char buffer[40];
+    IntToString(iTarget, buffer, sizeof(buffer));
+    hMenu.AddItem("target", buffer, ITEMDRAW_NOTEXT);
+    //IntToString(iClient, buffer, sizeof(buffer));
+    //hMenu.AddItem("admin", buffer);
+
+    //PrintToChatAll("TEST#2");
 
     hMenu.Display(iClient, TIME);
 }
 
 public int OnPunishGetted(Menu hMenu, MenuAction action, int iClient, int param2)
 {
+    char buffer[40];
+    hMenu.GetItem(5, "", 0, _, buffer, sizeof(buffer));
+    int iTarget = StringToInt(buffer);
     switch(action)
     {
         case MenuAction_End: hMenu.Close();
@@ -126,21 +146,29 @@ public int OnPunishGetted(Menu hMenu, MenuAction action, int iClient, int param2
             if(param2 == MenuCancel_Timeout)
                 switch(g_iDefaultPunish)
                 {
-                    case 1: UTIL_KickClient(g_iTarget, REASON);
-                    case 2: GiveMute(g_iTarget, g_iTimePunish, 0);
-                    case 3: GiveBan(g_iTarget, g_iTimePunish);
+                    case 1: UTIL_KickClient(iTarget, REASON);
+                    case 2: GiveMute(iClient, iTarget, g_iTimePunish, 0);
+                    case 3: GiveBan(iClient, iTarget, g_iTimePunish);
                 }
         }
         case MenuAction_Select:
         {
+            
             g_iTypePunish = param2;
-            if(g_iTypePunish != 4)
-                GetTimePunish(iClient);
+            if(g_iTypePunish != 4 && g_iTypePunish != 5)
+                GetTimePunish(iClient, buffer);
+            else
+            {
+                if(g_iTypePunish == 4)
+                    UTIL_KickClient(iTarget, REASON);
+                if(g_iTypePunish == 5)
+                    UTIL_SlayClient(iTarget, REASON);
+            }
         }
     }
 }
 
-void GetTimePunish(int iClient)
+void GetTimePunish(int iClient, const char[] id)
 {
     char path[PLATFORM_MAX_PATH];
     BuildPath(Path_SM, path, sizeof(path), "configs/warnsystem/punish.cfg");
@@ -154,18 +182,16 @@ void GetTimePunish(int iClient)
         //kv.Rewind();
         if (kv.JumpToKey("time", false))
         {
-            PrintToServer("Key exist");
             if(kv.GotoFirstSubKey(false))
             {
-                PrintToServer("First subkey is exist");
                 char buffer[64], info[20];
                 int time;
                 do {
                     KvGetSectionName(kv, buffer, sizeof(buffer));
-                    time = kv.GetNum(buffer);
+                    time = kv.GetNum(NULL_STRING);
                     IntToString(time, info, sizeof(info));
                     hMenu.AddItem(info, buffer);
-                    PrintToServer("Item added");
+                    PrintToServer("Item added :: Time is %d", time);
                     //KvGoBack(kv);
                 } while (kv.GotoNextKey(false));
                 //KvGoBack(kv);
@@ -177,22 +203,35 @@ void GetTimePunish(int iClient)
 	}
 	else SetFailState("Configuration file not found!");
 
-    if(hMenu.ItemCount != 0)
+    if(hMenu.ItemCount != 0) 
+    {
+        hMenu.AddItem("target", id, ITEMDRAW_NOTEXT);
         hMenu.Display(iClient, TIME);
+    }
     else
         hMenu.Close();
 }
 
 public int OnTimeGetted(Menu hMenu, MenuAction action, int iClient, int param2)
 {
-    int iTime;
+    int iTime, iTarget;
+    char buffer[40];
+    for(int i = 0, count = hMenu.ItemCount; i < count; ++i)
+    {
+        hMenu.GetItem(i, buffer, sizeof(buffer));
+        if(StrEqual(buffer, "target"))
+        {
+            hMenu.GetItem(i, "", 0, _, buffer, sizeof(buffer));
+            iTarget = StringToInt(buffer);
+        }
+    }
     switch(action)
     {
         case MenuAction_End: hMenu.Close();
         case MenuAction_Cancel:
         {
             if(param2 == MenuCancel_Timeout) 
-                DefaultPunish(param2);
+                DefaultPunish(iClient, param2);
             
         }
         case MenuAction_Select:
@@ -213,53 +252,55 @@ public int OnTimeGetted(Menu hMenu, MenuAction action, int iClient, int param2)
             }*/
             switch(g_iTypePunish)
             {
-                case 0: GiveBan(g_iTarget, iTime);
-                case 1: GiveMute(g_iTarget, iTime, 0); // mute
-                case 2: GiveMute(g_iTarget, iTime, 1); // gag
-                case 3: GiveMute(g_iTarget, iTime, 2); // m + g
-                case 4: UTIL_KickClient(g_iTarget, REASON);
+                case 0: GiveBan(iClient,iTarget, iTime);
+                case 1: GiveMute(iClient, iTarget, iTime, 0); // mute
+                case 2: GiveMute(iClient, iTarget, iTime, 1); // gag
+                case 3: GiveMute(iClient, iTarget, iTime, 2); // m + g
+                case 4: UTIL_KickClient(iTarget, REASON);
             }
         }
     }
 }
 
-void DefaultPunish(int iTarget)
+void DefaultPunish(int iClient, int iTarget)
 {
     switch(g_iDefaultPunish)
     {
         case 1: UTIL_KickClient(iTarget, REASON);
-        case 2: GiveMute(iTarget, g_iTimePunish, 0);
-        case 3: GiveBan(iTarget, g_iTimePunish);
+        case 2: GiveMute(iClient, iTarget, g_iTimePunish, 0);
+        case 3: GiveBan(iClient, iTarget, g_iTimePunish);
     }
 }
 
-void GiveBan(int iTarget, int iTime)
+void GiveBan(int iAdmin, int iTarget, int iTime)
 {
     if(g_bUseSb)
     {
         switch(g_iSbType){
-            case 0:     SBBanPlayer(g_iAdmin, iTarget, iTime, REASON);
-            case 1:     SBPP_BanPlayer(g_iAdmin, iTarget, iTime, REASON);
-            case 2:     MABanPlayer(g_iAdmin, iTarget, MA_BAN_STEAM, iTime, REASON);
+            case 0:     SBBanPlayer(iAdmin, iTarget, iTime, REASON);
+            case 1:     SBPP_BanPlayer(iAdmin, iTarget, iTime, REASON);
+            case 2:     MABanPlayer(iAdmin, iTarget, MA_BAN_STEAM, iTime, REASON);
         }
     } else {
         BanClient(iTarget, iTime, BANFLAG_AUTHID, REASON, REASON);
     }
 
-    CGOPrintToChatAll("%N получил бан на %d секунд", iTarget, iTime);
+    CGOPrintToChatAll("%N получил бан на %d минут", iTarget, iTime);
 }
 
-void GiveMute(int iTarget, int iTime, int iType)
+void GiveMute(int iAdmin, int iTarget, int iTime, int iType)
 {
+    PrintToServer("GiveMute(): %L, %d, %d", iTarget, iTime, iType);
+
     if(g_bUseSb)
     {
         if(g_iSbType == 2)
         {
             switch(iType)
             {
-                case 0: MASetClientMuteType(g_iAdmin, iTarget, REASON, MA_MUTE, iTime);
-                case 1: MASetClientMuteType(g_iAdmin, iTarget, REASON, MA_GAG, iTime);
-                case 2: MASetClientMuteType(g_iAdmin, iTarget, REASON, MA_SILENCE, iTime);
+                case 0: MASetClientMuteType(iAdmin, iTarget, REASON, MA_MUTE, iTime);
+                case 1: MASetClientMuteType(iAdmin, iTarget, REASON, MA_GAG, iTime);
+                case 2: MASetClientMuteType(iAdmin, iTarget, REASON, MA_SILENCE, iTime);
             }
         } else {
             switch(iType)
@@ -284,14 +325,26 @@ void GiveMute(int iTarget, int iTime, int iType)
             }
         }
     }
-
-    CGOPrintToChatAll("%N получил мут на %d секунд", iTarget, iTime);
+    char typePunish[16];
+    switch(iType)
+    {
+        case 1: strcopy(typePunish, sizeof(typePunish), "мут");
+        case 2: strcopy(typePunish, sizeof(typePunish), "гаг");
+        case 3: strcopy(typePunish, sizeof(typePunish), "мут+гаг");
+    }
+    CGOPrintToChatAll("%N получил %s на %d минут", typePunish, iTarget, iTime);
 }
 
 void UTIL_KickClient(int iClient, const char[] reason)
 {
     KickClient(iClient, reason);
-    CGOPrintToChatAll("%N получил кик", iClient);
+    CGOPrintToChatAll("%N получил кик.", iClient);
+}
+
+void UTIL_SlayClient(int client, const char[] reason)
+{
+    ForcePlayerSuicide(client);
+    CGOPrintToChatAll("%N был убит по причине: %s", client, reason);
 }
 
 stock bool IsValidClient(int iClient) { return (iClient > 0 && iClient < MaxClients && IsClientInGame(iClient) && !IsFakeClient(iClient)); }

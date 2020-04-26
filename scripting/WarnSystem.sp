@@ -3,7 +3,7 @@
 
 #define PLUGIN_NAME         "[warnsystem] Core Pro"
 #define PLUGIN_AUTHOR       "Rabb1t & vadrozh"
-#define PLUGIN_VERSION      "1.6.3"
+#define PLUGIN_VERSION      "1.6.3.1"
 #define PLUGIN_DESCRIPTION  "Warn players when they are doing something wrong"
 #define PLUGIN_URL          "hlmod.ru/threads/warnsystem.42835/"
 
@@ -196,7 +196,8 @@ public void OnClientPutInServer(int iClient) {
 
 public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129], bool bType)
 {
-	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient))
+	if (iClient && IsClientInGame(iClient) && !IsFakeClient(iClient)){
+		//PrintToServer("score: %d | warns: %d", g_iScore[iClient], g_iWarnings[iClient]);
 		switch (g_iMaxPunishment)
 		{
 			case 1:
@@ -209,6 +210,10 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129], b
 			}
 			case 3:
 			{
+				char dbQuery[256];
+				g_iWarnings[iClient] = g_iScore[iClient] = 0;
+				FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_DeleteWarns, g_iAccountID[iClient], g_iServerID);
+				g_hDatabase.Query(SQL_CheckError, dbQuery);
 				char sBanReason[129];
 				FormatEx(sBanReason, sizeof(sBanReason), "[warnsystem] %t", "WS_MaxBan", sReason, bType ? "баллов" : "предупреждений");
 				if (WarnSystem_WarnMaxPunishment(iAdmin, iClient, g_iBanLenght, sReason) == Plugin_Continue)
@@ -218,6 +223,7 @@ public void PunishPlayerOnMaxWarns(int iAdmin, int iClient, char sReason[129], b
 				}
 			}
 		}
+	}
 }
 
 public void PunishPlayer(int iAdmin, int iClient, int iScore, int iTime, char sReason[129])

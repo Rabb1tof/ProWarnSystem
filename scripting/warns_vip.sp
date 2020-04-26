@@ -10,7 +10,7 @@
 
 public Plugin myinfo =
 {
-    author = "Rabb1t (Discord: Rabb1t#2017)",
+    author = "Rabb1t (Discord: Rabb1t#4578)",
     name = "[WS] Warns access VIP",
     version = VERS_PLUGIN,
     description = "",

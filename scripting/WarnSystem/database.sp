@@ -475,6 +475,8 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 				PunishPlayerOnMaxWarns(iAdmin, iClient, sReason, true);
 			else if(g_iWarnings[iClient] >= g_iMaxWarns)
 				PunishPlayerOnMaxWarns(iAdmin, iClient, sReason, false);
+			g_iWarnings[iClient] = g_iScore[iClient] = 0;
+			//PrintToServer("score: %d | warns: %d", g_iScore[iClient], g_iWarnings[iClient]);
 		} else 
 			PunishPlayer(iAdmin, iClient, iScore, iTime, sReason);
 	}
