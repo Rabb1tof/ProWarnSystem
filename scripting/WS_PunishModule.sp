@@ -27,7 +27,7 @@ public Plugin myinfo =
     name = "[WarnSystem] Punish",
     author = "vadrozh, Rabb1t",
     description = "Module adds support of sb (all)",
-    version = "2.1",
+    version = "2.1.1",
     url = "hlmod.ru"
 }
 
@@ -66,7 +66,8 @@ public Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght
 
     hMenu.Display(iClient, TIME);*/
 
-    GetPunish(iClient, iTarget);
+    if(IsValidClient(iClient))
+        GetPunish(iClient, iClient);
 
     return Plugin_Handled;
 }
@@ -104,8 +105,8 @@ public Action WarnSystem_WarnMaxPunishment(int iAdmin, int iClient, int iBanLeng
     AddTargetsToMenu2(hMenu, iClient, COMMAND_FILTER_NO_BOTS|COMMAND_FILTER_NO_MULTI|COMMAND_FILTER_CONNECTED);
 
     hMenu.Display(iClient, TIME);*/
-
-    GetPunish(iAdmin, iClient);
+    if(IsValidClient(iClient))
+        GetPunish(iAdmin, iClient);
     //PrintToChatAll("TEST#1");
 
     return Plugin_Handled;
@@ -136,7 +137,7 @@ void GetPunish(int iClient, int iTarget) /* this function helpeful get punish fo
 public int OnPunishGetted(Menu hMenu, MenuAction action, int iClient, int param2)
 {
     char buffer[40];
-    hMenu.GetItem(5, "", 0, _, buffer, sizeof(buffer));
+    hMenu.GetItem(6, "", 0, _, buffer, sizeof(buffer));
     int iTarget = StringToInt(buffer);
     switch(action)
     {
