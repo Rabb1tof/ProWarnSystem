@@ -25,10 +25,10 @@ bool g_bUseSb;
 public Plugin myinfo =
 {
     name = "[WarnSystem] Punish",
-    author = "vadrozh, Rabb1t",
+    author = "Rabb1t",
     description = "Module adds support of sb (all)",
     version = "2.1.1",
-    url = "hlmod.ru"
+    url = "https://discord.gg/gpK9k8f https://t.me/rabb1tof"
 }
 
 public void OnPluginStart()
@@ -192,7 +192,7 @@ void GetTimePunish(int iClient, const char[] id)
                     time = kv.GetNum(NULL_STRING);
                     IntToString(time, info, sizeof(info));
                     hMenu.AddItem(info, buffer);
-                    PrintToServer("Item added :: Time is %d", time);
+                    //PrintToServer("Item added :: Time is %d", time);
                     //KvGoBack(kv);
                 } while (kv.GotoNextKey(false));
                 //KvGoBack(kv);
@@ -291,7 +291,7 @@ void GiveBan(int iAdmin, int iTarget, int iTime)
 
 void GiveMute(int iAdmin, int iTarget, int iTime, int iType)
 {
-    PrintToServer("GiveMute(): %L, %d, %d", iTarget, iTime, iType);
+    //PrintToServer("GiveMute(): %L, %d, %d", iTarget, iTime, iType);
 
     if(g_bUseSb)
     {
@@ -329,11 +329,11 @@ void GiveMute(int iAdmin, int iTarget, int iTime, int iType)
     char typePunish[16];
     switch(iType)
     {
-        case 1: strcopy(typePunish, sizeof(typePunish), "мут");
-        case 2: strcopy(typePunish, sizeof(typePunish), "гаг");
-        case 3: strcopy(typePunish, sizeof(typePunish), "мут+гаг");
+        case 0: strcopy(typePunish, sizeof(typePunish), "мут");
+        case 1: strcopy(typePunish, sizeof(typePunish), "гаг");
+        case 2: strcopy(typePunish, sizeof(typePunish), "мут+гаг");
     }
-    CGOPrintToChatAll("%N получил %s на %d минут", typePunish, iTarget, iTime);
+    CGOPrintToChatAll("%N получил %s на %d минут", iTarget, typePunish, iTime);
 }
 
 void UTIL_KickClient(int iClient, const char[] reason)
