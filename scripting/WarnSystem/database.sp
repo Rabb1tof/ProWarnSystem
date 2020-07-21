@@ -424,7 +424,7 @@ public void WarnPlayer(int iAdmin, int iClient, int iScore, int iTime, char sRea
 		
 		
 		// `account_id`, `username`, `warns`
-		if(!g_bWarnTime)
+		if(g_bWarnTime)
 			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, g_iWarnLength == 0 ? 0 : iCurrentTime + g_iWarnLength, bIsAdmin);
 		else
 			FormatEx(dbQuery, sizeof(dbQuery), g_sSQL_WarnPlayerW, g_iServerID, g_iAccountID[iClient], g_iAccountID[iAdmin], sEscapedReason, iScore, iCurrentTime, iCurrentTime + iTime, bIsAdmin);
