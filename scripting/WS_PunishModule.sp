@@ -57,8 +57,6 @@ public void OnDefaultPunishChanged(ConVar hCV, const char[] oldValue, const char
 
 public Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght, char sReason[129])
 {
-    // TODO: удалять к хуям добавление игроков меню.
-    
     g_iTimePunish = iBanLenght;
     /*Menu hMenu = new Menu(OnPlayerPunished);
     hMenu.SetTitle("Выберите наказание для игрока:");
