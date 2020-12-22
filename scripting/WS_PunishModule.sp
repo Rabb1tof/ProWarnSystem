@@ -34,7 +34,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
     g_cUseSb            = CreateConVar("sm_ws_use_sourcebans", "1", "Using SB / MA when warnings or score are max (0 - don't use, 1 - use).", _, true, 0.0, true, 1.0);
-    g_cSbType           = CreateConVar("sm_ws_sourcebans_type", "2", "Type of using sourcebans, where 0 - sb (old), 1 - sb++ (new), 2 - MaterialAdmin (MA FORK)");
+    g_cSbType           = CreateConVar("sm_ws_sourcebans_type_punish", "2", "Type of using sourcebans, where 0 - sb (old), 1 - sb++ (new), 2 - MaterialAdmin (MA FORK)");
     g_cDefaultPunish    = CreateConVar("sm_ws_default_punish", "1", "1 - kick, 2 - mute, 3 - ban");
 
     g_cSbType.AddChangeHook(OnSbTypeChanged);
@@ -65,7 +65,7 @@ public Action WarnSystem_WarnPunishment(int iClient, int iTarget, int iBanLenght
     hMenu.Display(iClient, TIME);*/
 
     if(IsValidClient(iClient))
-        GetPunish(iClient, iClient);
+        GetPunish(iClient, iTarget);
 
     return Plugin_Handled;
 }

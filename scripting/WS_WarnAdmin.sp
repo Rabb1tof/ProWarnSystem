@@ -129,7 +129,7 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
             OnClientDisconnect(iClient);
             #endif
         }
-        #if defined _sourcebans_included && defined _sourcebanspp_included && defined _materialadmin_included
+        #if defined _sourcebans_included || defined _sourcebanspp_included || defined _materialadmin_included
         else
         {
             FormatEx(szBuffer, sizeof(szBuffer), "INSERT INTO\
@@ -162,7 +162,7 @@ public void WarnSystem_OnClientWarn(int iAdmin, int iClient, int iScore, int iTi
         }
         #endif
         
-        #if defined _sourcebans_included && defined _sourcebanspp_included && defined _materialadmin_included
+        #if defined _sourcebans_included || defined _sourcebanspp_included || defined _materialadmin_included
         //PrintToServer("%s", szBuffer);
         g_hDatabase.Query(SQL_AdminWarn, szBuffer);
         #endif
